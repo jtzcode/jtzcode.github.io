@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="最近学习了万维钢老师解读的新书《上游：在问题发生之前解决问题》，收获不少。联想和类比自己从事的行业，谈谈一些浅显的体会，也能借鉴书中的思想。首先，上游思维有三个条件。 眼光在别人发不现问题时，你能看出问题。 这里的重点是问题不易被察觉，因而目前不是紧急的事情。如果问题大家都能看出来，可能很快就被解决，也就失去上游的意义。如果问题亟需解决，不然就会遭受巨大损失，那么也没有上游的意义。">
+<meta name="keywords" content="Tech,上游">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件开发中的“上游”思维">
+<meta property="og:url" content="http://yoursite.com/2020/09/24/upstream-software-dev/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="最近学习了万维钢老师解读的新书《上游：在问题发生之前解决问题》，收获不少。联想和类比自己从事的行业，谈谈一些浅显的体会，也能借鉴书中的思想。首先，上游思维有三个条件。 眼光在别人发不现问题时，你能看出问题。 这里的重点是问题不易被察觉，因而目前不是紧急的事情。如果问题大家都能看出来，可能很快就被解决，也就失去上游的意义。如果问题亟需解决，不然就会遭受巨大损失，那么也没有上游的意义。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200418075819276.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9tcHA=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200418080709792.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9tcHA=,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.288Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="软件开发中的“上游”思维">
+<meta name="twitter:description" content="最近学习了万维钢老师解读的新书《上游：在问题发生之前解决问题》，收获不少。联想和类比自己从事的行业，谈谈一些浅显的体会，也能借鉴书中的思想。首先，上游思维有三个条件。 眼光在别人发不现问题时，你能看出问题。 这里的重点是问题不易被察觉，因而目前不是紧急的事情。如果问题大家都能看出来，可能很快就被解决，也就失去上游的意义。如果问题亟需解决，不然就会遭受巨大损失，那么也没有上游的意义。">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200418075819276.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9tcHA=,size_16,color_FFFFFF,t_70">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/24/upstream-software-dev/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>软件开发中的“上游”思维 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/24/upstream-software-dev/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件开发中的“上游”思维
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-24 14:32:11" itemprop="dateCreated datePublished" datetime="2020-09-24T14:32:11+08:00">2020-09-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书/" itemprop="url" rel="index">
+                    <span itemprop="name">读书</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/24/upstream-software-dev/" class="post-meta-item leancloud_visitors" data-flag-title="软件开发中的“上游”思维" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/24/upstream-software-dev/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/24/upstream-software-dev/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近学习了万维钢老师解读的新书《上游：在问题发生之前解决问题》，收获不少。联想和类比自己从事的行业，谈谈一些浅显的体会，也能借鉴书中的思想。<br><img src="https://img-blog.csdnimg.cn/20200418075819276.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9tcHA=,size_16,color_FFFFFF,t_70" alt="上游"><br>首先，上游思维有三个条件。</p>
+<h3 id="眼光"><a href="#眼光" class="headerlink" title="眼光"></a>眼光</h3><p>在别人发不现问题时，你能看出问题。</p>
+<p>这里的重点是问题不易被察觉，因而目前不是紧急的事情。如果问题大家都能看出来，可能很快就被解决，也就失去上游的意义。如果问题亟需解决，不然就会遭受巨大损失，那么也没有上游的意义。</p>
+<a id="more"></a>
+<p>你发现软件系统里有个潜在的bug。这个bug有这样两个特点，一是发现它需要对代码逻辑和架构非常熟悉，而且要有丰富的调试和排查经验。二是这个bug在大多数用户场景不会出现，不会严重影响用户体验。</p>
+<p>那么这个bug的就是上游的问题，但是作为资深工程师的你发现了它，并不一定回去解决，这就涉及上游思维的其他条件。</p>
+<h3 id="责任"><a href="#责任" class="headerlink" title="责任"></a>责任</h3><p>有时候问题不是没人发现，而是没人愿意负责，这就会出现所谓“不注意盲点”（inattentional blindness）。在制度上安排特定的人负责是一种办法，但毕竟外在压力不如内在动力。如果有人主动愿意负责，消除盲点，就会及时发现并解决更多问题。</p>
+<p>上面那个bug是属于系统A模块B的，而你是负责模块C的开发与维护，那么很多工程师判断是不是该主动解决这个问题时，可能会采取责任&gt;能力的原则：我能修掉，但这不是我该做的。</p>
+<p>这确实是一个比较现实的问题，在一个组织中，不同团队的合作不仅仅是技术交流和分工那么简单。每个团队都有自己目标和资源，这些也可能与考核挂钩，开发资源的使用会比较慎重。然而，如果能够准确发现问题，就已经是上游思维了。</p>
+<h3 id="资本"><a href="#资本" class="headerlink" title="资本"></a>资本</h3><p>这里的资本不一定是指财富和社会地位，而是一种自由的、有“余闲”的精神状态。</p>
+<p>如果一个软件工程师每天的日程排的满满的，他的精力应付自己的开发任务尚且不足，更别提一些不必马上做的事了。</p>
+<p>想要所有工程师都有“余闲”去处理上游的事情不太现实，然而但凡有些条件的同仁们可以想想自己的时间安排，是否能够规划固定的余闲时间来处理一些重要但不紧急的开发任务呢？长期来看，这些余闲的积累可能给你和团队带来惊喜。</p>
+<p>上游思维还有七个方法。</p>
+<h3 id="系统思维"><a href="#系统思维" class="headerlink" title="系统思维"></a>系统思维</h3><p>以前我听到系统思维，总是理解为要综合考虑问题，其实这只是一方面。好的系统应该是不用时刻考虑方方面面，一切都是自然的、井井有条的，从而感觉不到系统的存在。设计软件系统和流程也可以借鉴这个思想。</p>
+<p>如果我们在开发一个软件系统时发现，同类型的问题经常出现，并且不易察觉和调试，那么很可能原来的系统架构设计就有问题。这时一次重构也许是必要的，而不是头痛医头脚痛医脚。</p>
+<p>很多系统尤其是运维（DevOps）团队的系统，其实可以实现一些自我反馈的算法和逻辑，当系统出现问题，自动采取一些修复的动作，最大限度减少人为的干预。毕竟，人为干预可能引入新的问题。</p>
+<h3 id="联手解决"><a href="#联手解决" class="headerlink" title="联手解决"></a>联手解决</h3><p>让不同背景的人共同参与讨论和实现，可能是高效的做法。只是人多还不够，还需要多样性。</p>
+<p>一个开发团队如果有不同技术背景的工程师，那在遇到难解的问题，或者进行架构设计时，就会获得从不同技术角度得出的思路和想法。避免因为团队整体的技术短板，导致开发结束才暴露出设计上的缺陷。</p>
+<h3 id="寻找支点"><a href="#寻找支点" class="headerlink" title="寻找支点"></a>寻找支点</h3><p>支点是系统中最关键或者最危险的因素，但由于分布的不均匀，并不容易发现。数据分析是判断支点的工具。有些“坏事”的模式还可能隐藏的很深，只有数据还是不够，更需要好的分析方法。</p>
+<p>每个开发团队都会额外开发一些监控系统、日志收集和分析系统或者bug分布图表等，目的是分析软件产品在实际运行中的表现，好在哪里、坏在哪里可以一目了然。</p>
+<p>这些数据有助于团队决策者调整研发和测试的方向，最终提高产品的体验和质量。有时，趋势和瓶颈不是那么明显，还需要借助机器学习算法来辅助分析，进而发现一些潜在的、有用的模式。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200418080709792.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9tcHA=,size_16,color_FFFFFF,t_70" alt="上游思维"></p>
+<h3 id="提前预警"><a href="#提前预警" class="headerlink" title="提前预警"></a>提前预警</h3><p>预警是通过一些蛛丝马迹对即将可能发生的“坏事”提出警示，将一些恶行扼杀在萌芽中，防患于未然。预警也常常依赖于对数据的收集和分析。</p>
+<h3 id="识别“假成功”"><a href="#识别“假成功”" class="headerlink" title="识别“假成功”"></a>识别“假成功”</h3><p>警惕三种假成功：跟随大潮的、靠运气的成功；找出替代方案回避原始问题的成功；完成指标伤害使命的成功。</p>
+<p>程序员们可能都有这样的经历，有时候代码正常运行需要靠“运气”，产品上线前要找个“祖师爷”拜拜。这当然不是长久之计，软件程序正常运转不代表软件没有问题，尤其是你已经意识到程序某个部分可能有问题、但实际没有问题发生的时候。</p>
+<p>此时最关键的做法是分析运气成分，即为什么明明有潜在问题而没有出问题。当然，很多人觉得还有更紧急的事情要做，但欠的债早晚要还的。如果它可能出问题，那么早晚会出问题。</p>
+<p>寻找替代方案（workaround）也是类似，替代方案可用会让你放松对代码质量的把控，这样可能导致冗余、扩展性差、耦合性高的代码。一时的成功可能是未来的大坑。</p>
+<p>开发流程中也有各种指标来评价和规范流程，比如测试的覆盖率、bug的修复率等等。过度关注这些指标，可能会忽视代码的功能本身。一个开发者可能为了满足一些静态代码扫描工具的指标，而放弃原有的代码结构，而原有的结构可能是质量更高的。</p>
+<h3 id="反馈"><a href="#反馈" class="headerlink" title="反馈"></a>反馈</h3><p>你照顾系统的部分，就可能会伤害整体；你从整体考虑，又可能会伤害某个部分。要想尽量避免伤害，你需要反馈。及时的反馈有助于发现一些行为的二级效应或者副作用，这可能需要走一步看一步，先做一些试点，再慎重推广。</p>
+<p>在软件发布阶段的测试里有一种方法叫“金丝雀（Canary）测试”。大致的思路是，先让产品部署到一小部分用户群体中，看看是否有严重问题出现，根据反馈的结果决定是否扩大部署范围，最终产品会部署到所有用户终端。很久以前，煤矿的矿工就是放一只金丝雀到井口，看看是否有毒气出现。</p>
+<h3 id="让人买单"><a href="#让人买单" class="headerlink" title="让人买单"></a>让人买单</h3><p>找人为上游的行动买单，就要找到利益相关者，并让他相信上游的问题确实会出现，解决问题确实会带来收益。</p>
+<p>有时工程师会对产品的流程或者设计提出优化方案，这可能需要额外的人员支持，管理和开发工具的购买，已有流程和工具的调整等等。</p>
+<p>这就需要说服利益相关者采取行动，你需要给出对比的数据，在优化前是什么表现，优化后提升了多少，这些提升是否能成为改变的理由。有时不同团队之间的沟通和说服，还需要向上寻求帮助，从更高层的战略角度来向下推行，这取决于公司的结构和文化。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/上游/" rel="tag"># 上游</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/03/12/angluar-large-list/" rel="next" title="日拱一卒系列（五）—— Angular 大列表性能优化">
+                  <i class="fa fa-chevron-left"></i> 日拱一卒系列（五）—— Angular 大列表性能优化
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/24/load-balance-guide/" rel="prev" title="负载均衡技术概览">
+                  负载均衡技术概览 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#眼光"><span class="nav-number">1.</span> <span class="nav-text">眼光</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#责任"><span class="nav-number">2.</span> <span class="nav-text">责任</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#资本"><span class="nav-number">3.</span> <span class="nav-text">资本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统思维"><span class="nav-number">4.</span> <span class="nav-text">系统思维</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联手解决"><span class="nav-number">5.</span> <span class="nav-text">联手解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找支点"><span class="nav-number">6.</span> <span class="nav-text">寻找支点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#提前预警"><span class="nav-number">7.</span> <span class="nav-text">提前预警</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#识别“假成功”"><span class="nav-number">8.</span> <span class="nav-text">识别“假成功”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反馈"><span class="nav-number">9.</span> <span class="nav-text">反馈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#让人买单"><span class="nav-number">10.</span> <span class="nav-text">让人买单</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

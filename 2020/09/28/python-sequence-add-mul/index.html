@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文分享一下在Python序列上使用加号和乘号的特性，以及背后的一些有趣实现，供您参考。 序列的加和乘在序列相加其实就是拼接，加号两侧的数据类型要相同。拼接过程不会修改原来对象，而是生成一个新对象来保存结果。这个操作比较常见，比如字符串的拼接和列表的拼接。 所谓序列的乘，其实是把序列乘以一个整数N，效果是把列表中元素复制N份，然后再拼接起来。比如： 123456l = [0, 1, 2]print">
+<meta name="keywords" content="Tech,Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python序列：+和*的微妙之处">
+<meta property="og:url" content="http://yoursite.com/2020/09/28/python-sequence-add-mul/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="本文分享一下在Python序列上使用加号和乘号的特性，以及背后的一些有趣实现，供您参考。 序列的加和乘在序列相加其实就是拼接，加号两侧的数据类型要相同。拼接过程不会修改原来对象，而是生成一个新对象来保存结果。这个操作比较常见，比如字符串的拼接和列表的拼接。 所谓序列的乘，其实是把序列乘以一个整数N，效果是把列表中元素复制N份，然后再拼接起来。比如： 123456l = [0, 1, 2]print">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.202Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python序列：+和*的微妙之处">
+<meta name="twitter:description" content="本文分享一下在Python序列上使用加号和乘号的特性，以及背后的一些有趣实现，供您参考。 序列的加和乘在序列相加其实就是拼接，加号两侧的数据类型要相同。拼接过程不会修改原来对象，而是生成一个新对象来保存结果。这个操作比较常见，比如字符串的拼接和列表的拼接。 所谓序列的乘，其实是把序列乘以一个整数N，效果是把列表中元素复制N份，然后再拼接起来。比如： 123456l = [0, 1, 2]print">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/28/python-sequence-add-mul/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Python序列：+和*的微妙之处 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/28/python-sequence-add-mul/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python序列：+和*的微妙之处
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-28 20:57:04" itemprop="dateCreated datePublished" datetime="2020-09-28T20:57:04+08:00">2020-09-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/28/python-sequence-add-mul/" class="post-meta-item leancloud_visitors" data-flag-title="Python序列：+和*的微妙之处" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/28/python-sequence-add-mul/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/28/python-sequence-add-mul/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文分享一下在Python序列上使用加号和乘号的特性，以及背后的一些有趣实现，供您参考。</p>
+<h3 id="序列的加和乘"><a href="#序列的加和乘" class="headerlink" title="序列的加和乘"></a>序列的加和乘</h3><p>在序列相加其实就是拼接，加号两侧的数据类型要相同。拼接过程不会修改原来对象，而是生成一个新对象来保存结果。这个操作比较常见，比如字符串的拼接和列表的拼接。</p>
+<p>所谓序列的乘，其实是把序列乘以一个整数N，效果是把列表中元素<strong>复制N份</strong>，然后再拼接起来。比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">l = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line">print(l * <span class="number">3</span>)</span><br><span class="line">print(<span class="number">3</span> * <span class="string">'abcd'</span>)</span><br><span class="line"></span><br><span class="line">&gt;&gt; [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line">&gt;&gt; abcdabcdabcd</span><br></pre></td></tr></table></figure>
+
+<p>有了这个乘的操作，我们可以用来方便地初始化多维的序列。比如：</p>
+<a id="more"></a>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">board = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>):</span><br><span class="line">    row = [<span class="string">'_'</span>] * <span class="number">3</span></span><br><span class="line">    board.append(row)</span><br><span class="line">board[<span class="number">2</span>][<span class="number">1</span>] = <span class="string">'A'</span></span><br><span class="line">print(board)</span><br><span class="line"></span><br><span class="line">&gt;&gt; [[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'A'</span>, <span class="string">'_'</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>列表<code>board</code>的每个元素是一个长度为3的列表。这些列表每个元素初始化为占位符<code>_</code>，然后可以赋值。这里面有个小陷阱是，初始化时<strong>使用同一个引用生成不同的元素</strong>，这会导致很多元素都指向同样的内存。比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wrong_board = [[<span class="string">'_'</span>] * <span class="number">3</span>] * <span class="number">3</span></span><br><span class="line">print(wrong_board)</span><br><span class="line">wrong_board[<span class="number">0</span>][<span class="number">1</span>] = <span class="string">'Z'</span></span><br><span class="line">print(wrong_board)</span><br><span class="line"></span><br><span class="line">&gt;&gt; [[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>]]</span><br><span class="line">&gt;&gt; [[<span class="string">'_'</span>, <span class="string">'Z'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'Z'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'Z'</span>, <span class="string">'_'</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>上面的初始化看起来没有问题，但是由于乘法生成的列表都是同一个引用，修改元素时也会影响到所有相同引用的列表元素。这可能不是想要的结果。</p>
+<h3 id="序列的增量赋值"><a href="#序列的增量赋值" class="headerlink" title="序列的增量赋值"></a>序列的增量赋值</h3><p>序列的增量赋值就是<code>+=</code>操作，它将列表拼接的结果赋值给原来列表。与相加之后再赋值相比，<strong>增量赋值没有新的对象产生</strong>，而是直接使用原对象作为结果。</p>
+<p>没有新对象产生听起来是个好事，但有个前提。执行增量赋值的类必须<strong>实现了<code>__iadd__</code>特殊方法</strong>，在执行+=操作时就会调用这个方法。如果没有这个方法，就会先构造一个新的对象保存结果。像list这种可变序列，就实现了这个方法。</p>
+<p>序列乘也有类似的增量赋值，背后原理也一样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">daye = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">dama = (<span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">daye *= <span class="number">2</span></span><br><span class="line">dama *= <span class="number">3</span></span><br><span class="line">print(daye)</span><br><span class="line">print(dama)</span><br><span class="line"></span><br><span class="line">&gt;&gt; [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">&gt;&gt; (<span class="number">4</span>, <span class="number">5</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>对于不可变序列（如元组），解释器会创建新对象，把原来对象的元素复制到新对象中，最后再append新的元素，过程比较繁琐。上面例子中赋值后的元组<code>dama</code>已经不是你3年前的<code>dama</code>了。</p>
+<p>Python对<code>str</code>的处理比较特殊。虽然也是不可变序列，但是<code>str</code>的拼接太普遍，CPython对这个过程进行了优化。<code>str</code>在初始化时会<strong>留出一定的额外空间供未来扩展</strong>，就省去了拷贝原有字符的时间。</p>
+<p><em>Fluent Python</em> 这本书提到了一个有意思的题目，下面的代码会返回什么结果？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">t = (<span class="number">1</span>, <span class="number">2</span>, [<span class="number">30</span>, <span class="number">40</span>])</span><br><span class="line">t[<span class="number">2</span>] += [<span class="number">50</span>, <span class="number">60</span>]</span><br><span class="line">print(t)</span><br></pre></td></tr></table></figure>
+
+<p>你可能会说，元组是不可变序列，不能对其中的元素赋值，所以会抛出异常。确实如此，不过这个异常的背后有一个副作用，就是那个<strong>赋值操作依然成功</strong>了！也就是元素<code>t[2]</code>变成了<code>[30, 40, 50, 60]</code>。</p>
+<p>这个现象反映出，Python执行增量赋值<strong>不是一个原子操作</strong>，而是分步进行。首先保存原来的元素值，然后把目标元素值改变。注意，这里是改变列表<code>[30, 40]</code>的值，因此是可变的。最后，把这个新值赋值给元组的元素。这一步才会出异常，不过前面一步的赋值已经完成了。</p>
+<p>这提醒我们，最好不要在元组中放入可变的对象，因为你不知道什么时候会去改变它，而你的改动成功了却不自知。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><em>Fluent Python</em>. Chapter 2.</li>
+<li><a href="https://stackoverflow.com/questions/12169839/which-is-the-preferred-way-to-concatenate-a-string-in-python" target="_blank" rel="noopener">https://stackoverflow.com/questions/12169839/which-is-the-preferred-way-to-concatenate-a-string-in-python</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/28/python-sequence-slice/" rel="next" title="Python 序列之切片（slice）">
+                  <i class="fa fa-chevron-left"></i> Python 序列之切片（slice）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/29/jenkins-notes-8-msbuild-sonar/" rel="prev" title="Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner">
+                  Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#序列的加和乘"><span class="nav-number">1.</span> <span class="nav-text">序列的加和乘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#序列的增量赋值"><span class="nav-number">2.</span> <span class="nav-text">序列的增量赋值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

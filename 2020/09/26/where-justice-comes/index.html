@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="​本文是阅读熊逸著作《正义从哪里来》之后的思考。这本书的思辨性极强，观点和论证密集，加上作者学贯古今中西的视野和底蕴，阅读节奏会很慢，但不时有发现新大陆的畅快感。如果你也喜欢思辨，且对人类思想史，尤其是对公平、自由和正义相关的讨论感兴趣，本书是不错的选择。  天赋人权？我们谈正义，一般就离不开权利的话题。近一个多月，美国弗洛伊德事件引发的抗议和暴力活动持续不断。有色人种要求平等，要求与美国白人同等">
+<meta name="keywords" content="文学,熊逸,社会,正义">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正义沉思">
+<meta property="og:url" content="http://yoursite.com/2020/09/26/where-justice-comes/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="​本文是阅读熊逸著作《正义从哪里来》之后的思考。这本书的思辨性极强，观点和论证密集，加上作者学贯古今中西的视野和底蕴，阅读节奏会很慢，但不时有发现新大陆的畅快感。如果你也喜欢思辨，且对人类思想史，尤其是对公平、自由和正义相关的讨论感兴趣，本书是不错的选择。  天赋人权？我们谈正义，一般就离不开权利的话题。近一个多月，美国弗洛伊德事件引发的抗议和暴力活动持续不断。有色人种要求平等，要求与美国白人同等">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/26/where-justice-comes/正义.png">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.289Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="正义沉思">
+<meta name="twitter:description" content="​本文是阅读熊逸著作《正义从哪里来》之后的思考。这本书的思辨性极强，观点和论证密集，加上作者学贯古今中西的视野和底蕴，阅读节奏会很慢，但不时有发现新大陆的畅快感。如果你也喜欢思辨，且对人类思想史，尤其是对公平、自由和正义相关的讨论感兴趣，本书是不错的选择。  天赋人权？我们谈正义，一般就离不开权利的话题。近一个多月，美国弗洛伊德事件引发的抗议和暴力活动持续不断。有色人种要求平等，要求与美国白人同等">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/26/where-justice-comes/正义.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/26/where-justice-comes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>正义沉思 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/26/where-justice-comes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          正义沉思
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-26 17:34:22" itemprop="dateCreated datePublished" datetime="2020-09-26T17:34:22+08:00">2020-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书/" itemprop="url" rel="index">
+                    <span itemprop="name">读书</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/26/where-justice-comes/" class="post-meta-item leancloud_visitors" data-flag-title="正义沉思" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/26/where-justice-comes/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/26/where-justice-comes/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>​本文是阅读熊逸著作《正义从哪里来》之后的思考。这本书的思辨性极强，观点和论证密集，加上作者学贯古今中西的视野和底蕴，阅读节奏会很慢，但不时有发现新大陆的畅快感。如果你也喜欢思辨，且对人类思想史，尤其是对公平、自由和正义相关的讨论感兴趣，本书是不错的选择。</p>
+<p><img src="/2020/09/26/where-justice-comes/正义.png" alt="head"></p>
+<h2 id="天赋人权？"><a href="#天赋人权？" class="headerlink" title="天赋人权？"></a>天赋人权？</h2><p>我们谈正义，一般就离不开权利的话题。近一个多月，美国弗洛伊德事件引发的抗议和暴力活动持续不断。有色人种要求平等，要求与美国白人同等的权利，那么这个权利是哪里来的？天赋人权成立吗？</p>
+<p>作者认为，哪里有什么天赋人权，权利都是人类经过长期的博弈和妥协逐渐形成的共识。说权利是“天赋”的，可能基于统治的需求，也可能处于对论证难度的逃避。</p>
+<a id="more"></a>
+<p>柏拉图希望他设计的理想国中，分属三大等级的人们能各安其位，不做非分之想，每个等级的人权是先天确定的。中国的儒家里也有“神道设教”，百姓只需要知道什么是对的，不必问为什么是对的，只要心存敬畏之心就可以了。这显然都利于统治。</p>
+<p>至于论证的难度，美国《独立宣言》开篇就说：“我们认为以下这些真理是不言而喻的：人人生而平等，造物主赋予他们若干不可剥夺的权利…”，”我们认为“不代表就是正确的前提，估计美国的国父们也对严密的论证无能为力。</p>
+<p>我们以平等为例探讨一下。作为群居动物的人类，在原始的文明中有平等的意识吗？在一个靠身体吃饭的动物群体中，身强力壮者更容易获得优质的食物和配偶，渐渐地就会形成对其他个体的显著优势，其他个体为了自保也会自动退回服从和被奴役状态，双方相安无事。这就是等级的来源，也是原始社会的常态。也就是说“不平等”其实更接近人类原始的常态。</p>
+<p>然而，人类还天生具有一种“嫉妒心”，对于高等级的群体“养尊处优”的生活十分眼馋，也想从中分一杯羹，甚至要打一个翻身仗。这样不同等级的人类就会冲突，弱势群体虽然实力不济，但是人数众多可以前仆后继。</p>
+<p>强势群体虽然有实力，但也可能经不起折腾或者放松警惕。争来争去，不同等级的人们就会形成均势和妥协，两败俱伤之后大家都想恢复元气，于是一些停战的协议和规则就被制定出来，不平等的程度减弱，弱势群体就争取到了部分权利。</p>
+<h2 id="利益与正义"><a href="#利益与正义" class="headerlink" title="利益与正义"></a>利益与正义</h2><p>获得权利以后就是拥有了正义吗？在我们印象里，正义似乎是个道德概念，并不完全由实力决定。历史上使用暴力获得绝对权力的人物不在少数，他们是正义的吗？显然不一定。然而残酷的现实是，正义有时就是由强者定义和书写的，代表了强者的利益。</p>
+<p>以此为基础，一切违背强者利益的都是非正义的，需要被扼杀的。弱者可以不同意正义的内涵，但是却因为丧失话语权而无法掀起波澜。古时候打着“清君侧”旗号起兵的将领，如果有绝对的实力，那就是伸张正义，成为护国元勋。如果实力不济，那就是乱臣贼子，人人得而诛之。</p>
+<p>仔细想来，如果正义被强者垄断，那么正义本身也就失去意义了，反正强者怎么做都是对的。只有实力和身份对等的时候，才有正义可谈。”弱国无外交”还是有道理的，别国来侵犯领土，或者使用外交手段剥夺利益，你诉诸正义去强烈谴责有用吗？</p>
+<p>美国黑人在社会中的地位本来就不高，基于这种现状想要获得正义，难度确实不小。虽说言论是自由的，行动是自由的，但一些根深蒂固的观念和利益已经难以撼动，更不要说实力不济的黑人群体了。</p>
+<p>这里再多说一句，之前看《美国种族简史》了解到非洲裔美国人的一些历史。美国社会曾经对被奴役的黑人有这样的一种论调：“…这些被奴役的人们与其他人存在着如此之大的差别，以至于美国的立国原则和理想不适用于他们。就是说，这些人才智低劣，缺乏感情，体会不出堕落、做苦工或家庭关系遭到破坏的痛苦…。确实，这种强烈的种族主义观甚至使得像托克维尔和林肯这样一些力主废除奴隶制的人士，也对解放奴隶的后果忧心忡忡…”。可以看到，这种歧视是刻在骨子里的观念，连宪法和进步人士都解决不了。</p>
+<p>当我们说伸张正义时，比如黑人群体的正义，民族的正义，国家的正义，真正有这么多的正义类型吗？其实，最后还是要落到个人利益和福祉上。说追求正义就是为了利益，可能比较世俗，一些人难以接受，但当我们思考实现正义的标准时，就难免与利益挂钩了。比如每个人都有受教育权利这个正义的追求，就不能抛开教育让个体受益终身这个事实而谈。</p>
+<p>进一步说，利益又是主观的，每个人对利益的定义和要求都不同，正义也就没有客观标准。一些人的正义之举可能会损害另一部分的利益，在那部分看来就没有正义可言，冲突就在所难免。不过有意思的是，大家都不会说自己的利益受损，而是经常高举正义大旗来攻击对手。</p>
+<h2 id="自由意志的难题"><a href="#自由意志的难题" class="headerlink" title="自由意志的难题"></a>自由意志的难题</h2><p>这本书还有一个有意思的话题就是自由意志。我们说一个人违反了道德和法律，他就是非正义的。然而这里的前提是这个人可以对自己的行为负责，即有自由意志。不过这个人是否有自由意志这可是个哲学难题。按照佛教里的缘起理论和因果律，一切结果都是有原因的，没有无因之果。</p>
+<p>我们可以想象宇宙诞生之初就有一个“第一因”，万事万物都是这个“因”的某个结果，当然包括每个人的意识和想法。这么说来，每个人的一生发生什么事情都是命中注定的，不免陷入了宿命论的境地。</p>
+<p>问题在于，如果因果律成立，人们就不需要对自己的行为负责，也就没有什么正义可言了。因此，现在的道德和法律体系，都以人具备某种“自由意志”为前提和假设，尽管这个“自由意志”定义没那么精确。</p>
+<p>我对因果律的看法是，它的确定性中依然存在不确定性，这就是万物多样性的来源。即使所有的物理规律都是由“第一因”导致的，我们不能忽略确定规律中概率性。</p>
+<p>宇宙演化到如今的地步是有很大偶然性的，尽管这背后有确定的规律，但这个结果本身应该让我们欣喜。况且，以人类目前掌握的知识，还没有了解宇宙的全貌。因此，我们不必为宿命论烦恼，在不确定性的道路上还有很长的路要走。</p>
+<h2 id="适度的正义"><a href="#适度的正义" class="headerlink" title="适度的正义"></a>适度的正义</h2><p>作者认为，绝对的公平正义是不存在的，追求适度公平才是可行的方案。人类除了嫉妒心之外，还有同情心，这也是人的天性。同情心让我们能对他人的不幸感同身受，同时激发正义感。</p>
+<p>不过这种同情心的范围是有限的，只能在一定范围的社群内生效，要么是亲友，要么是组织，最大可能到民族和国家。就像亚当·斯密在《国富论》中提到的一样，对于熟悉的人，我们可以利用同情心来互帮互助，而对于远距离的陌生人，只能通过市场和贸易来促进双方的福祉了。</p>
+<p>另外，处于同一群体的人类通常更有认同感，而对群体之外心有戒备，这就会导致不同群体对道德和价值的定义不同，也就有不同的实现正义方式。</p>
+<p>因此，正义需要从群体内开始，适度进行和演化。就像前面说的权利，不同群体需要妥协和博弈，不是那么容易融合统一的。</p>
+<p>以上是我的阅读收获，欢迎讨论。多说一句，这本书需要集中精力来阅读，不然很多逻辑性强的讨论部分容易不解，精彩之处被错过。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/文学/" rel="tag"># 文学</a>
+              <a href="/tags/熊逸/" rel="tag"># 熊逸</a>
+              <a href="/tags/社会/" rel="tag"># 社会</a>
+              <a href="/tags/正义/" rel="tag"># 正义</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/26/book-juwairen-notes/" rel="next" title="《局外人》读后">
+                  <i class="fa fa-chevron-left"></i> 《局外人》读后
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/26/self-destiny/" rel="prev" title="自我与命运">
+                  自我与命运 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#天赋人权？"><span class="nav-number">1.</span> <span class="nav-text">天赋人权？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利益与正义"><span class="nav-number">2.</span> <span class="nav-text">利益与正义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自由意志的难题"><span class="nav-number">3.</span> <span class="nav-text">自由意志的难题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#适度的正义"><span class="nav-number">4.</span> <span class="nav-text">适度的正义</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

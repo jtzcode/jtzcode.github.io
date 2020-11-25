@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言在定义Jenkins CI Pipeline时，我们难免会用到Docker。将复杂Build/Test/Deploy的过程放到容器中，既可以重用环境设置和工具集，也能高效地使用资源。不过我们可能遇到如下场景：  在build过程中需要使用Docker命令来启动新的容器或者build新的image Jenkins的master或者slave本身就是在容器中运行的  无论哪种情况，本质都是在Doc">
+<meta name="keywords" content="Tech,日拱一卒,DevOps,Jenkins">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿">
+<meta property="og:url" content="http://yoursite.com/2020/09/26/jenkins-notes-5-dind/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言在定义Jenkins CI Pipeline时，我们难免会用到Docker。将复杂Build/Test/Deploy的过程放到容器中，既可以重用环境设置和工具集，也能高效地使用资源。不过我们可能遇到如下场景：  在build过程中需要使用Docker命令来启动新的容器或者build新的image Jenkins的master或者slave本身就是在容器中运行的  无论哪种情况，本质都是在Doc">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200814164509658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.181Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿">
+<meta name="twitter:description" content="引言在定义Jenkins CI Pipeline时，我们难免会用到Docker。将复杂Build/Test/Deploy的过程放到容器中，既可以重用环境设置和工具集，也能高效地使用资源。不过我们可能遇到如下场景：  在build过程中需要使用Docker命令来启动新的容器或者build新的image Jenkins的master或者slave本身就是在容器中运行的  无论哪种情况，本质都是在Doc">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200814164509658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/26/jenkins-notes-5-dind/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/26/jenkins-notes-5-dind/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-26 17:00:55" itemprop="dateCreated datePublished" datetime="2020-09-26T17:00:55+08:00">2020-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/26/jenkins-notes-5-dind/" class="post-meta-item leancloud_visitors" data-flag-title="Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/26/jenkins-notes-5-dind/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/26/jenkins-notes-5-dind/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在定义Jenkins CI Pipeline时，我们难免会用到Docker。将复杂Build/Test/Deploy的过程放到容器中，既可以重用环境设置和工具集，也能高效地使用资源。不过我们可能遇到如下场景：</p>
+<ul>
+<li>在build过程中需要使用Docker命令来启动新的容器或者build新的image</li>
+<li>Jenkins的master或者slave本身就是在容器中运行的</li>
+</ul>
+<p>无论哪种情况，本质都是在Docker容器内部运行Docker命令，即所谓的 <strong>Docker-In-Docker - DIND</strong>场景。本文简单介绍DIND的概念和应用。</p>
+<h2 id="概念和原理"><a href="#概念和原理" class="headerlink" title="概念和原理"></a>概念和原理</h2><p>Docker In Docker从原理上说实际有两种方式，第一种可以说是<strong>伪DIND</strong>，也就是Docker的client端在另一个Docker容器中，而server端（docker daemon）还是在宿主机host上。</p>
+<a id="more"></a>
+<p>比如，你在host上启动了一个container（container-with-docker），这个container里面装有Docker CLI，你可以进行docker ps/push/build等操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it container-with-docker sh</span><br></pre></td></tr></table></figure>
+
+<p>接下来在container的sh程序里，你需要执行<code>docker images</code>命令。直接执行是不行的，因为命令的执行需要与Docker的server端daemon进程通信，container-with-docker这个容器内部并没有这个进程。这就引出了DIND的第一种方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -v /var/run/docker.sock:/var/run/docker.sock container<span class="_">-a</span></span><br></pre></td></tr></table></figure>
+
+<p>这里使用了<code>docker run</code>的<code>-v</code>参数，把docker宿主机的docker.sock套接字装载到目标container中，UNIX socket实现为文件，因此可以用来装载。不过这里要求启动的container是一个linux container（比如名为container-a的container）。</p>
+<p>这样，container内部就可以执行docker命令了。不过在container内部的<strong>Docker CLI仍然在于Docker宿主机的daemon通信</strong>。并且，如果在内部新启动一个container-b，它与原来的container-a是<strong>兄弟（sibling）关系，而非父子（children）关系</strong>，也就是在宿主机上使用<code>docker ps</code>可以看到新的container。如下图（图片来自参考资料1）：<br><img src="https://img-blog.csdnimg.cn/20200814164509658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70#pic_center" alt="Docker outside of Docker"><br>因此，这并不是真正的Docker In Docker，因为内部启动的container并没有在内部运行，也没有与container内部的daemon通信。这种情况常被成为<strong>Docker outside of Docker（DOOD）</strong></p>
+<p>那么如何实现真正的DIND呢？</p>
+<p>实际上有优秀的开发者（JÉRÔME PETAZZONI）已经找到解决方案并开发出相应的image。相关代码和文档请参考资料2和3。</p>
+<p>总的来说，DIND的思路是在内部container里面也装有daemon process并可以启动。然后，内部的container就是在内部运行，并通过CLI与内部的daemon process通信（而非外部host的daemon）。用法如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --privileged --name my-dind -it -d docker:dind</span><br></pre></td></tr></table></figure>
+
+<p>首先启动一个装有完整Docker的container（docker:dind)，注意要使用<code>--privileged</code>开关，否则会有权限问题。如果你的Docker版本不支持这个开关，则需要下载最新版本。</p>
+<p><code>-d</code>参数让Docker daemon在后台运行，不进入任何程序。使用<code>--name</code>选项指定一个名字，稍后使用。</p>
+<p>下面再启动一个新的container “docker”，并链接到（link）到刚才container（<code>my-dind</code>）的daemon：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --rm --link my-dind docker sh</span><br></pre></td></tr></table></figure>
+
+<p>启动成功后进入shell，我们可以在这个container里面运行Docker命令了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/ <span class="meta"># docker info</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">Client:</span><br><span class="line"> Debug Mode: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">Server:</span><br><span class="line"> Containers: 0</span><br><span class="line">  Running: 0</span><br><span class="line">  Paused: 0</span><br><span class="line">  Stopped: 0</span><br><span class="line"> Images: 0</span><br><span class="line"> Server Version: 19.03.12</span><br><span class="line"> Storage Driver: overlay2</span><br><span class="line">  Backing Filesystem: xfs</span><br><span class="line">  Supports d_type: <span class="literal">true</span></span><br><span class="line">  Native Overlay Diff: <span class="literal">true</span></span><br><span class="line"> Logging Driver: json-file</span><br><span class="line"> Cgroup Driver: cgroupfs</span><br><span class="line"> Plugins:</span><br><span class="line">  Volume: <span class="built_in">local</span></span><br><span class="line">  Network: bridge host ipvlan macvlan null overlay</span><br><span class="line">  Log: awslogs fluentd gcplogs gelf journald json-file <span class="built_in">local</span> logentries splunk syslog</span><br><span class="line"> Swarm: inactive</span><br><span class="line"> Runtimes: runc</span><br><span class="line"> Default Runtime: runc</span><br><span class="line"> Init Binary: docker-init</span><br><span class="line"> containerd version: 7ad184331fa3e55e52b890ea95e65ba581ae3429</span><br><span class="line"> runc version: dc9208a3303feef5b3839f4323d9beb36df0a9dd</span><br><span class="line"> init version: fec3683</span><br><span class="line"> Security Options:</span><br><span class="line">  seccomp</span><br><span class="line">   Profile: default</span><br><span class="line"> Kernel Version: 3.10.0-1062.18.1.el7.x86_64</span><br><span class="line"> Operating System: Alpine Linux v3.12 (containerized)</span><br><span class="line"> OSType: linux</span><br><span class="line"> Architecture: x86_64</span><br><span class="line"> CPUs: 4</span><br><span class="line"> Total Memory: 7.629GiB</span><br><span class="line"> Name: 112c6d7e818a</span><br><span class="line"> ID: K5MJ:G3VS:IPWZ:JSW5:YJ3E:KQ5H:L7GA:TCLZ:5XXI:WV7E:YL5I:N3IJ</span><br><span class="line"> Docker Root Dir: /var/lib/docker</span><br><span class="line"> Debug Mode: <span class="literal">false</span></span><br><span class="line"> Registry: https://index.docker.io/v1/</span><br><span class="line"> Labels:</span><br><span class="line"> Experimental: <span class="literal">false</span></span><br><span class="line"> Insecure Registries:</span><br><span class="line">  127.0.0.0/8</span><br><span class="line"> Live Restore Enabled: <span class="literal">false</span></span><br><span class="line"> Product License: Community Engine</span><br></pre></td></tr></table></figure>
+
+<p>如果运行命令时出现如下错误：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error during connect: Get http://docker:2375/v1.40/containers/json: dial tcp: lookup docker on 10.108.x.x:53: server misbehaving</span><br></pre></td></tr></table></figure>
+
+<p>说明Docker期待与2375端口通信，但是没有找。事实上，DIND最新版里由于支持TLS，也打开了2376端口，并且是默认行为，Docker其实在与2376端口通信。想要关闭这个默认功能，可以如下这样启动后台的daemon：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --privileged --name mine-dind -e DOCKER_TLS_CERTDIR=<span class="string">""</span> -d docker:dind</span><br></pre></td></tr></table></figure>
+
+<p>通过把<code>DOCKER_TLS_CERTDIR</code>环境变量设为空，让DinD在非TLS模式下工作，从而找到正确的端口。有关这个开关的具体信息请参考资料3。</p>
+<p>最后多说几句，DIND并不是推荐的最佳实践，其作者专门写了一篇文章（资料4）来分析DIND的一些缺陷，在使用前请确认你真的需要，且没有其他替代方案。</p>
+<p>另外，DIND并不支持Windows container，即使是使用DOOD方案，也要保证内部的container是linux container（因为基于Unix Socket），尽管host可以是Windows 版本的Docker。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="https://blog.nestybox.com/2019/09/14/dind.html" target="_blank" rel="noopener">https://blog.nestybox.com/2019/09/14/dind.html</a></li>
+<li><a href="https://www.docker.com/blog/docker-can-now-run-within-docker/" target="_blank" rel="noopener">https://www.docker.com/blog/docker-can-now-run-within-docker/</a></li>
+<li><a href="https://hub.docker.com/_/docker/" target="_blank" rel="noopener">https://hub.docker.com/_/docker/</a></li>
+<li><a href="https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/" target="_blank" rel="noopener">https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/</a></li>
+<li><a href="https://itnext.io/docker-in-docker-521958d34efd" target="_blank" rel="noopener">https://itnext.io/docker-in-docker-521958d34efd</a></li>
+<li><a href="https://github.com/jpetazzo/dind" target="_blank" rel="noopener">https://github.com/jpetazzo/dind</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/26/jenkins-notes-4-powershell/" rel="next" title="Jenkins Pipeline 手记（4）—— 远程Powershell权限困局">
+                  <i class="fa fa-chevron-left"></i> Jenkins Pipeline 手记（4）—— 远程Powershell权限困局
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/26/jenkins-notes-6-azure/" rel="prev" title="Jenkins Pipeline 手记（6）—— 使用 Azure VM 作为动态节点">
+                  Jenkins Pipeline 手记（6）—— 使用 Azure VM 作为动态节点 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概念和原理"><span class="nav-number">2.</span> <span class="nav-text">概念和原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

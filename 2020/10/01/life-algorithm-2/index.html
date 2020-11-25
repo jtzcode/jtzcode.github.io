@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="​本文是阅读老喻老师的新书《人生算法》的心得体会的下篇。前一篇我们谈到了何谓人生的算法，以及我认为算法中很重要的部分：模式。闭环和内核都是有用的模式。这一篇我们来说说愿景这个话题，以及这本书的重要主题：概率思维。  愿景当我们识别和挖掘了自己的内核之后，就可以基于这个内核，规模化复制，并选择一个平台或者市场，开启增长之路。 外在的需求需要与内核的特点契合，从而达到最佳状态，让增长可持续。这就要求建">
+<meta name="keywords" content="算法,人生">
+<meta property="og:type" content="article">
+<meta property="og:title" content="人生的算法（下）">
+<meta property="og:url" content="http://yoursite.com/2020/10/01/life-algorithm-2/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="​本文是阅读老喻老师的新书《人生算法》的心得体会的下篇。前一篇我们谈到了何谓人生的算法，以及我认为算法中很重要的部分：模式。闭环和内核都是有用的模式。这一篇我们来说说愿景这个话题，以及这本书的重要主题：概率思维。  愿景当我们识别和挖掘了自己的内核之后，就可以基于这个内核，规模化复制，并选择一个平台或者市场，开启增长之路。 外在的需求需要与内核的特点契合，从而达到最佳状态，让增长可持续。这就要求建">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/10/01/life-algorithm-2/life.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/10/01/life-algorithm-2/gold.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.186Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="人生的算法（下）">
+<meta name="twitter:description" content="​本文是阅读老喻老师的新书《人生算法》的心得体会的下篇。前一篇我们谈到了何谓人生的算法，以及我认为算法中很重要的部分：模式。闭环和内核都是有用的模式。这一篇我们来说说愿景这个话题，以及这本书的重要主题：概率思维。  愿景当我们识别和挖掘了自己的内核之后，就可以基于这个内核，规模化复制，并选择一个平台或者市场，开启增长之路。 外在的需求需要与内核的特点契合，从而达到最佳状态，让增长可持续。这就要求建">
+<meta name="twitter:image" content="http://yoursite.com/2020/10/01/life-algorithm-2/life.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/10/01/life-algorithm-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>人生的算法（下） | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/01/life-algorithm-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          人生的算法（下）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-01 08:58:32" itemprop="dateCreated datePublished" datetime="2020-10-01T08:58:32+08:00">2020-10-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书/" itemprop="url" rel="index">
+                    <span itemprop="name">读书</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/10/01/life-algorithm-2/" class="post-meta-item leancloud_visitors" data-flag-title="人生的算法（下）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/10/01/life-algorithm-2/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/01/life-algorithm-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>​本文是阅读老喻老师的新书《人生算法》的心得体会的下篇。前一篇我们谈到了何谓人生的算法，以及我认为算法中很重要的部分：模式。闭环和内核都是有用的模式。这一篇我们来说说愿景这个话题，以及这本书的重要主题：<strong>概率思维</strong>。
+<img src="/2020/10/01/life-algorithm-2/life.jpg" alt="head"></p>
+<h2 id="愿景"><a href="#愿景" class="headerlink" title="愿景"></a>愿景</h2><p>当我们识别和挖掘了自己的内核之后，就可以基于这个内核，规模化复制，并选择一个平台或者市场，开启增长之路。</p>
+<p>外在的需求需要与内核的特点契合，从而达到最佳状态，让增长可持续。这就要求建立一个反馈回路，不断发现新的增长点，甚至是建立新的内核。</p>
+<p>从哪里获得反馈呢？答案之一就是愿景。企业和组织喜欢强调愿景，愿景听上去虚无缥缈，不是很实在，但我觉得还是很重要的。</p>
+<p>之所以觉得”虚“，我认为有两个原因：一是因为我们没有把他与切身利益和行动联系起来，二是愿景本身不够清晰、明确、可度量。</p>
+<a id="more"></a>
+<p>实际上，好的愿景不是忽悠人的工具，而是指导决策的武器。</p>
+<p>书中把愿景比作北极星，我觉得这是很妙的比喻。北极星式的愿景有三个特点：</p>
+<ol>
+<li><p>指北。愿景提供方向性，方向性就是反馈的来源，让我们时刻处于正确的方向上。</p>
+</li>
+<li><p>明亮。这意味着可视化，即目标明确。不清晰的目标会让人迷失、盲目、误解，且结果不易衡量。</p>
+</li>
+<li><p>全局。这一点尤为重要。愿景通常是较大的长期目标，相当于退一步看待未来世界，防止我们陷入基于已有经验的过度拟合。短视的目标可以随时把我们拽进死胡同。</p>
+</li>
+</ol>
+<p>阿里巴巴的一个愿景是“让天下没有难做的生意”，以此为指导才会有电商、云计算、支付、金融服务等各大平台，而不仅仅是关注平台的流量和产品的销量。</p>
+<p>愿景不止适用于企业和组织，也适用于个人。有时我们会陷入短时的迷茫，不知道下一步做什么，这时就需要一个愿景的指导。有了愿景，我们就可以从结果反推，一步一步得到当下需要做的事情。这就类似“黄金圈法则”：</p>
+<p><img src="/2020/10/01/life-algorithm-2/gold.jpg" alt="head"></p>
+<p>我们从愿景出发，就是问自己”为什么要做“，进而问自己要实现整个愿景”该怎么做“？，进一步拆分做法，最后就可以落实到“做什么”上面。这样我们可以避免盲目地从外圈出发，最后得不到预期的结果。甚至根本没有预期，而只是在随机行动而已。</p>
+<p>以愿景指导决策和行动，是一个有用的模式，我们应该将其纳入人生算法中。这个“黄金圈”我们不妨经常画一画、改一改，时刻提醒自己，将其内化为思考习惯。</p>
+<h2 id="概率权"><a href="#概率权" class="headerlink" title="概率权"></a>概率权</h2><p>这本书的副标题是“用概率思维做好决策”，内容的一大部分都在反复强调概率思维的各个侧面，下面说说我的体会。</p>
+<p>喻老师提出了“概率权”的概念，它说的是能不能计算出一件事成功的概率，同时可以承担它失败的风险，不愿承担风险就是放弃了概率权。</p>
+<p>注意，我们选择是否放弃概率权的前提是先拥有概率权。这看似是我们自主决定的，但是很多时候我们并没有主动去计算和把握与自己息息相关的事件的概率，对概率都没有底，何谈承担风险？何谈选择与放弃？</p>
+<p>因此，要拥有概率权，我们首先要培养量化思维。面对不确定的前景，积极寻找办法量化其中的关键因素。作者说：<br>所谓商业模式，就是能算的过来别人算不过来的账。<br>如果账人人都能算明白，那决策的失误率只取决于运气了。</p>
+<p>不过，算账的本领并非令人望而生畏，很多事情在我们细化它之前，都是看起来不可完成的。量化可以逐步逐层展开，不必一步到位，也不一定要十分精确。所谓量化思维其实就是通过增加显示世界的分辨率，逐步逼近真相。</p>
+<p>掌握了概率就有机会行使概率权，依据概率大小对未来的风险进行评估，为决策提供依据。只要风险在可承受的范围内，行动就可以展开。</p>
+<p>人们有损失厌恶的情绪无可厚非，但如果不对损失的风险有多大详加考察就草率地放弃，就是对自己和未来的不负责。</p>
+<p>概率权是基于精心的概率计算，不是鼓动冒险行为。精心而不是精确，因为世界的复杂性远超想象，根本无法精确计算。</p>
+<p>对于个体来说，学习和阅读也是需要概率权的。每个人精力有限，而回报不确定且不能立竿见影，学什么以及如何学，就是关键的决策，需要概率的指导。</p>
+<p>学一项要过时的技术，当下会有不错的收益，但其贬值速度会极快，未来会血本无归。待在舒适区和盲目跟风，都是在学习上放弃了概率权。</p>
+<h2 id="可变概率"><a href="#可变概率" class="headerlink" title="可变概率"></a>可变概率</h2><p>依据每个人的特点，他未来能做成什么、不能做成什么的概率分布大致是确定的。我们首先要相信人生的这个概率特征，牢记各个行业领域的基础比率，对大数定律保持基本敬意。</p>
+<p>如果有意外的惊喜，不要轻易当作是必然、是可重复的模式，要考察背后的运气因素；同理，如果遭遇挫败，不要轻易当作是宿命、是挥之不去的阴影，也不能忘了运气因素；规律不稳定，可能是数不够大，时间线不够长。</p>
+<p>然而，这个概率分布并非不可改变。人生也是一个系统，诸多因素决定了系统的结果及其概率。</p>
+<p>我们要通过从多因素下手，改变各因素的影响，让成功概率提高。再通过长期的尝试，由大数定律帮助我们接近那个概率，并稳定下来。这就是喻老师所说的：努力从赌徒模式升级为赌场模式。</p>
+<h2 id="灰度认知"><a href="#灰度认知" class="headerlink" title="灰度认知"></a>灰度认知</h2><p>最后来说说灰度认知的概念。这里的灰度是指避免非黑即白的绝对化思维，认知过程要接纳多种可能性，作为决策的材料和依据。</p>
+<p>灰度依然涉及概率。一个事件的原因可能处于多个因素的概率叠加态，我们在认知阶段要发掘出这个叠加状态的细节。这其实体现的还是量化思维。</p>
+<p>好比量子力学里波函数，它能准确描述量子的复杂状态，但不要急于测量，否则它就坍缩成极端的单一状态，也就失去了本来面目。</p>
+<p>认知的最终目的是辅助决策，决策的结果反过来也可以检测认知的效果。因此，灰度的认知也需要经验的总结和提炼，认知配比需要不断完善和改进，以期调配出好看的莫兰迪色系。</p>
+<p>保持认知灰度的一个方法是，尽力扩大认知半径，让诸多可能性被感知到，并为我所用。同时还要防止进入“知识吸毒”状态，即一味扩大认知半径，而忽略了能力和行动。</p>
+<p>这本书中还很多概念和论述值得深入思考，感兴趣的话可以找来细读。读完这本书只是一个起点，很多思考看起来很有道理，但不一定能马上付诸实践。最好的状态是按需索取，内化为思维习惯，那么有些内容仍需要反复阅读和练习了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/算法/" rel="tag"># 算法</a>
+              <a href="/tags/人生/" rel="tag"># 人生</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/10/01/life-algorithm-1/" rel="next" title="人生的算法（上）">
+                  <i class="fa fa-chevron-left"></i> 人生的算法（上）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/10/23/linux-namespace-container/" rel="prev" title="Linux命名空间与容器技术浅谈">
+                  Linux命名空间与容器技术浅谈 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#愿景"><span class="nav-number">1.</span> <span class="nav-text">愿景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概率权"><span class="nav-number">2.</span> <span class="nav-text">概率权</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可变概率"><span class="nav-number">3.</span> <span class="nav-text">可变概率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#灰度认知"><span class="nav-number">4.</span> <span class="nav-text">灰度认知</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言今天跟大家分享一个Git Revert的实践。最近在项目中做一些跟持续集成（CI）相关的工作，其中有一块涉及代码的回退操作（Revert），我们需要自动化地实现这些功能，因此需要调用Git的命令来完成。 回退代码的方式在使用Git作为代码管理工具时，常见的回退代码方式有两种，一是 reset 命令： 1git reset commit_id  这条命令可以让本地的Git目录回退到指定的com">
+<meta name="keywords" content="Tech,日拱一卒,Git">
+<meta property="og:type" content="article">
+<meta property="og:title" content="日拱一卒系列（三）—— Git Revert 探究">
+<meta property="og:url" content="http://yoursite.com/2020/03/04/git-revert-study/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言今天跟大家分享一个Git Revert的实践。最近在项目中做一些跟持续集成（CI）相关的工作，其中有一块涉及代码的回退操作（Revert），我们需要自动化地实现这些功能，因此需要调用Git的命令来完成。 回退代码的方式在使用Git作为代码管理工具时，常见的回退代码方式有两种，一是 reset 命令： 1git reset commit_id  这条命令可以让本地的Git目录回退到指定的com">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/03/04/git-revert-study/abstract.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.154Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日拱一卒系列（三）—— Git Revert 探究">
+<meta name="twitter:description" content="引言今天跟大家分享一个Git Revert的实践。最近在项目中做一些跟持续集成（CI）相关的工作，其中有一块涉及代码的回退操作（Revert），我们需要自动化地实现这些功能，因此需要调用Git的命令来完成。 回退代码的方式在使用Git作为代码管理工具时，常见的回退代码方式有两种，一是 reset 命令： 1git reset commit_id  这条命令可以让本地的Git目录回退到指定的com">
+<meta name="twitter:image" content="http://yoursite.com/2020/03/04/git-revert-study/abstract.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/04/git-revert-study/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>日拱一卒系列（三）—— Git Revert 探究 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/04/git-revert-study/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          日拱一卒系列（三）—— Git Revert 探究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-04 20:23:47" itemprop="dateCreated datePublished" datetime="2020-03-04T20:23:47+08:00">2020-03-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/03/04/git-revert-study/" class="post-meta-item leancloud_visitors" data-flag-title="日拱一卒系列（三）—— Git Revert 探究" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/03/04/git-revert-study/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/04/git-revert-study/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/2020/03/04/git-revert-study/abstract.jpg" alt="head"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>今天跟大家分享一个Git Revert的实践。最近在项目中做一些跟持续集成（CI）相关的工作，其中有一块涉及代码的回退操作（Revert），我们需要自动化地实现这些功能，因此需要调用Git的命令来完成。</p>
+<h2 id="回退代码的方式"><a href="#回退代码的方式" class="headerlink" title="回退代码的方式"></a>回退代码的方式</h2><p>在使用Git作为代码管理工具时，常见的回退代码方式有两种，一是 <code>reset</code> 命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset commit_id</span><br></pre></td></tr></table></figure>
+
+<p>这条命令可以让本地的Git目录回退到指定的commit ID，并且<strong>不会保留该commit之后的commit记录</strong>。详细的文档可以参考<a href="https://git-scm.com/docs/git-reset" target="_blank" rel="noopener">这里</a>。这有时不是我们想要的，我们的需求可能是既可以回退代码到某一个版本，又保留这期间的所有commit记录，这时就需要用到 <code>revert</code> 命令：</p>
+<a id="more"></a>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert commit_id</span><br></pre></td></tr></table></figure>
+
+<p>这条命令撤回指定commit的改动，注意是<strong>撤回</strong>某个改动，不是<strong>撤回到</strong>某个改动。另外，这条命令不会删除任何commit记录，而是会新增一条Revert操作的commit记录（弹出commit message的编辑窗口）。举个例子，我在一个空的Git目录里创建了一个 <code>test.txt</code> 文件，并添加了一行文本。然后添加一行文本，提交一次，一共添加两行。到这里，一共有三个commit产生：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit ab2e366cf06c0bc0591e4abcdb671d6aa22c8ffa "Add 3rd line."</span><br><span class="line">commit 2a980c12d3e8ee49ebb9a3fcffee4e2f2794ec8f "Add 2nd line."</span><br><span class="line">commit 17a141dc77811320d75f258f7d3e53d91633fdfe "Init commit."</span><br></pre></td></tr></table></figure>
+
+<p>这时如果想去掉第三行文本的改动，可以执行如下操作：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert ab2e366cf06c0bc0591e4abcdb671d6aa22c8ffa</span><br></pre></td></tr></table></figure>
+
+<p>或者直接：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert HEAD</span><br></pre></td></tr></table></figure>
+
+<p>这时Git的Log类似这样：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">commit 0d90a9a82353019b14721394567dae174a5d8f35 "Revert 'Add 3rd line.'"</span><br><span class="line">commit ab2e366cf06c0bc0591e4abcdb671d6aa22c8ffa "Add 3rd line."</span><br><span class="line">commit 2a980c12d3e8ee49ebb9a3fcffee4e2f2794ec8f "Add 2nd line."</span><br><span class="line">commit 17a141dc77811320d75f258f7d3e53d91633fdfe "Init commit."</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到原来的commit并没有消失，而是多了一条Revert操作的commit。查看文件，其中最后一行已经不见了。这里我们需要注意的是执行Revert操作的顺序。我们有时需要回退掉多个commit的修改，<code>revert</code> 命令也支持这样的参数（参考<a href="https://git-scm.com/docs/git-revert" target="_blank" rel="noopener">这里</a>），但<strong>不按顺序</strong>的Revert可能会导致冲突，只有解决了冲突之后再执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert --continue</span><br></pre></td></tr></table></figure>
+
+<p>如果不想继续操作，可以放弃：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert --abort</span><br></pre></td></tr></table></figure>
+
+<p>如果是从最新的代码开始回退，我们不妨按顺序依次Revert每个commit，以避免冲突。</p>
+<h2 id="一些实践"><a href="#一些实践" class="headerlink" title="一些实践"></a>一些实践</h2><p>有时候我们在做Revert操作需要一些检查，比如查看对应的commit记录是否存在：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -r --contains COMMIT_ID</span><br></pre></td></tr></table></figure>
+
+<p>这条命令可以查看哪些分支（Branch）上有指定的commit记录，由此我们可以判断是不是需要在当前分支上进行Revert操作，这里的commit ID也可以换成tags。我们还可以比较与某个版本的区别：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git diff --shortstat COMMIT_ID</span><br><span class="line"></span><br><span class="line">3 files changed, 481 insertions(+), 139 deletions(-)</span><br></pre></td></tr></table></figure>
+
+<p><code>shortstat</code> 选项让结果只显示简短的统计数据。在实现自动化脚本时，这些命令可以用来实现需要的逻辑。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://git-scm.com/docs/git-revert" target="_blank" rel="noopener">https://git-scm.com/docs/git-revert</a></li>
+<li><a href="https://git-scm.com/docs/git-reset" target="_blank" rel="noopener">https://git-scm.com/docs/git-reset</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/Git/" rel="tag"># Git</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/03/02/typescript-types/" rel="next" title="日拱一卒系列（二）—— 理解 TypeScript 类型">
+                  <i class="fa fa-chevron-left"></i> 日拱一卒系列（二）—— 理解 TypeScript 类型
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/03/05/react-reusability/" rel="prev" title="日拱一卒系列（四）—— React 组件重用探究">
+                  日拱一卒系列（四）—— React 组件重用探究 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回退代码的方式"><span class="nav-number">2.</span> <span class="nav-text">回退代码的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些实践"><span class="nav-number">3.</span> <span class="nav-text">一些实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言Groovy是一门运行在Java虚拟机上的语言，语言特性与Java很类似，又有所区别，既可以利用JDK中丰富的API，由有自己独特之处。我们熟悉的应用场景之一就是在CI工具Jenkins中编写集成脚本。这篇文章就从类型的角度来分享一下Groovy与Java的一些不同之处，供您参考。 动态类型Groovy是动态强类型语言。静态类型语言的一个特点是编译时的类型检查，比如Java和C++语言。动态类">
+<meta name="keywords" content="Tech,Groovy,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Groovy有何不同 —— 类型篇">
+<meta property="og:url" content="http://yoursite.com/2020/11/10/why-groovy-different-types/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言Groovy是一门运行在Java虚拟机上的语言，语言特性与Java很类似，又有所区别，既可以利用JDK中丰富的API，由有自己独特之处。我们熟悉的应用场景之一就是在CI工具Jenkins中编写集成脚本。这篇文章就从类型的角度来分享一下Groovy与Java的一些不同之处，供您参考。 动态类型Groovy是动态强类型语言。静态类型语言的一个特点是编译时的类型检查，比如Java和C++语言。动态类">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/11/10/why-groovy-different-types/groovy-logo.png">
+<meta property="og:image" content="http://yoursite.com/2020/11/10/why-groovy-different-types/groovy-type.png">
+<meta property="og:updated_time" content="2020-11-25T11:39:47.232Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Groovy有何不同 —— 类型篇">
+<meta name="twitter:description" content="引言Groovy是一门运行在Java虚拟机上的语言，语言特性与Java很类似，又有所区别，既可以利用JDK中丰富的API，由有自己独特之处。我们熟悉的应用场景之一就是在CI工具Jenkins中编写集成脚本。这篇文章就从类型的角度来分享一下Groovy与Java的一些不同之处，供您参考。 动态类型Groovy是动态强类型语言。静态类型语言的一个特点是编译时的类型检查，比如Java和C++语言。动态类">
+<meta name="twitter:image" content="http://yoursite.com/2020/11/10/why-groovy-different-types/groovy-logo.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/11/10/why-groovy-different-types/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Groovy有何不同 —— 类型篇 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/10/why-groovy-different-types/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Groovy有何不同 —— 类型篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-10 10:41:59" itemprop="dateCreated datePublished" datetime="2020-11-10T10:41:59+08:00">2020-11-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-25 19:39:47" itemprop="dateModified" datetime="2020-11-25T19:39:47+08:00">2020-11-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/11/10/why-groovy-different-types/" class="post-meta-item leancloud_visitors" data-flag-title="Groovy有何不同 —— 类型篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/11/10/why-groovy-different-types/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/11/10/why-groovy-different-types/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Groovy是一门运行在Java虚拟机上的语言，语言特性与Java很类似，又有所区别，既可以利用JDK中丰富的API，由有自己独特之处。我们熟悉的应用场景之一就是在CI工具Jenkins中编写集成脚本。这篇文章就从<strong>类型</strong>的角度来分享一下Groovy与Java的一些不同之处，供您参考。<br><img src="/2020/11/10/why-groovy-different-types/groovy-logo.png" alt="groovy"></p>
+<h2 id="动态类型"><a href="#动态类型" class="headerlink" title="动态类型"></a>动态类型</h2><p>Groovy是动态强类型语言。静态类型语言的一个特点是编译时的类型检查，比如Java和C++语言。动态类型则可以把类型检查推迟到运行时。所谓类型的强弱，是指在运行时是否能及时发现类型错误。</p>
+<p>比如C++，如果把一个变量强制转换为一个错误类型，编译器会并不会阻止，而在运行时是否出错、以及什么时候出现则不一定。根据内存如何配置，调用是否多态，虚函数表如何组织等不同条件，最终表现也很难预测。这就是“弱”类型语言的表现。从这个意义来讲，Java和Groovy是强类型语言，可以在运行时找出错误的类型转换。</p>
+<a id="more"></a>
+<p>Groovy还是一种动态类型语言，可以不在编译时做类型检查，也可以动态修改程序结构，这给Groovy提供了足够的灵活性，以实现一些强大的功能，比如元编程能力。下图展示了类型的强弱与动态静态之间的关系。<br><img src="/2020/11/10/why-groovy-different-types/groovy-type.png" alt="type">)</p>
+<h3 id="能力式设计"><a href="#能力式设计" class="headerlink" title="能力式设计"></a>能力式设计</h3><p>由于Groovy语言具有动态性，在使用它进行程序设计时也与Java有所不同。</p>
+<p>比如接口的设计，使用Java语言时我们通常采用<strong>契约式</strong>设计，即使用接口定义一组操作作为契约，凡是实现这个接口的类都要履行接口的契约，完成对指定方法的实现。这样做的好处是，我们不关心某一个类型是否是另一个类型（大象是否是一个动物，男人是否是人类，机器人是否是工人，等等），只关心它是否实现了某个接口定义的功能。</p>
+<p>契约式设计的局限性是，我们在使用接口提供的功能时，要明确指定接口类型，即调用者依赖接口定义，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Worker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Robot</span> <span class="keyword">implements</span> <span class="title">Worker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">startWorking</span><span class="params">(Worker worker)</span> </span>&#123;</span><br><span class="line">        worker.work();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Worker robot = <span class="keyword">new</span> Robot();</span><br><span class="line">User.startWorking(robot);</span><br></pre></td></tr></table></figure>
+
+<p><code>User</code>要使用<code>Worker</code>完成工作，需要显式依赖并传入<code>Worker</code>接口类型。虽然我们保证了传入的对象一定具有<code>work</code>方法，但我们无法传入<strong>具有work公开方法但没有实现Worker接口</strong>的其他任何对象。Groovy等动态语言可以解决这个问题，这就是所谓的<strong>能力式设计</strong>，接受一切具备某种能力的对象，无论它是什么类型、实现了什么接口。回到刚才的例子：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> startWorking(worker) &#123;</span><br><span class="line">    worker.work();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里凡是具有<code>work</code>能力（即定义了<code>work</code>方法）的对象都可以传递给<code>startWorking</code>方法。</p>
+<p>你可能会问，如果worker对象没有定义work方法怎么办？的确，这种设计需要使用者保证这一点，因此是有风险的。这是在安全性和灵活性之间的一种权衡，如果你希望编译器帮你保证调用的正确，那就要牺牲一定的灵活性，反之亦然。</p>
+<p>使用动态类型语言需要谨慎和保守一些，并写好充分的单元测试，单元测试可以帮助我们发现一些潜在的、编译器无法直接发现的问题。</p>
+<h3 id="多方法"><a href="#多方法" class="headerlink" title="多方法"></a>多方法</h3><p>Groovy的动态性还改变了多态的实现方式。如果一个类中有重载的方法，Groovy会聪明地选择正确的实现。不仅基于调用方法的对象，还基于所提供的参数。因为方法分派基于多个实体：目标加参数，所以这被称作<strong>多分派或多方法（Multimethods）</strong>。回到刚才的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">(Number taskID)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span> <span class="keyword">extends</span> <span class="title">Worker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">(Number taskID)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Robot</span> <span class="keyword">extends</span> <span class="title">Worker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">(Number task)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">work</span><span class="params">(BigDecimal taskID)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">startWorking</span><span class="params">(Worker worker)</span> </span>&#123;</span><br><span class="line">        worker.work(<span class="keyword">new</span> BigDecimal(<span class="number">1230.0</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Worker robot = <span class="keyword">new</span> Robot();</span><br><span class="line">User.startWorking(robot);</span><br><span class="line"></span><br><span class="line">Worker man = <span class="keyword">new</span> Man()</span><br><span class="line">User.startWorking(man);</span><br></pre></td></tr></table></figure>
+
+<p>这次<code>Man</code>和<code>Robot</code>都继承于<code>Worker</code>类，实现了<code>work</code>方法。不同的是，<code>Robot</code>还另外重载了一个<code>work</code>方法，以<code>BigDecimal</code>为参数类型（重载<code>Number</code>类型）。那么在调用<code>startWorking</code>方法时，如果传入了<code>BigDecimal</code>类型的task ID，哪个方法会被执行呢？</p>
+<p>在Java中多态是严格依据类型和方法签名来实现的，也就是说在基类<code>Worker</code>定义的<code>work</code>方法需要<code>Number</code>类型的参数，在调用多态方法时就会尽量寻找参数类型<code>Number</code>的<code>work</code>方法。在<code>Robot</code>类中，依然是第一个方法被调用，尽管它还声明了一个接受<code>BigDecimal</code>参数的方法，参数类型不一致，传入的<code>BigDecimal</code>会被隐式转换成<code>Number</code>。</p>
+<p>而同样的代码放到Groovy环境中，结果会不同。如前所述，Groovy会同时匹配方法和参数，而不是严格依据基类的定义。这样在<code>Robot</code>类中，传入<code>BigDecimal</code>类型的重载方法就会被调用。</p>
+<h3 id="类型检查和编译"><a href="#类型检查和编译" class="headerlink" title="类型检查和编译"></a>类型检查和编译</h3><p>Groovy在默认情况下是不执行静态类型检查的，不过有时为了保证类型安全也可以开启该功能。比如：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@groovy</span>.transform.TypeChecked </span><br><span class="line"><span class="keyword">def</span> log(String text) &#123;</span><br><span class="line">    println(text.touppercase())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在使用了<code>TypeChecked</code>注解后，对于类型上的错误（上面的touppercase方法拼写有误）Groovy在编译时就会报错。</p>
+<p>Groovy元编程和动态类型的特性虽然灵活，但是需要以性能为代价。性能的下降与代码、所调用方法的个数等因素相关。当不需要元编程和动态能力时，与等价的Java代码相比，性能损失可能高达10%。</p>
+<p>如果想避免大部分性能损失，可以选择关闭动态特性。可以使用<code>@CompileStatic</code>注解让Groovy执行静态编译。这样为目标代码生成的字节码会和Java生成的字节码很像。</p>
+<p>下一篇文章将继续关注Groovy的其他特性。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>Groovy程序设计 [美] Venkat Subramaniam</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Groovy/" rel="tag"># Groovy</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/10/23/linux-namespace-container/" rel="next" title="Linux命名空间与容器技术浅谈">
+                  <i class="fa fa-chevron-left"></i> Linux命名空间与容器技术浅谈
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态类型"><span class="nav-number">2.</span> <span class="nav-text">动态类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#能力式设计"><span class="nav-number">2.1.</span> <span class="nav-text">能力式设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多方法"><span class="nav-number">2.2.</span> <span class="nav-text">多方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类型检查和编译"><span class="nav-number">2.3.</span> <span class="nav-text">类型检查和编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

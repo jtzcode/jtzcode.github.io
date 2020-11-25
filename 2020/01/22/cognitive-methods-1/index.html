@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言这个系列文章作为对学习吴伯凡老师的课程《认知方法论》的总结和思考。感兴趣的朋友可以在得到APP上搜索吴伯凡老师的课程以及我的笔记。这是门年度课程，正课部分有两百多篇文章，加上复习和答疑，总共有三百多篇。可以说，每一篇的内容都会引人思考，比较耐读。 我前后学习了两遍，第一遍以听为主，印象不是很深刻；第二遍坚持在正课下留言写笔记，前后也有5万字左右，对所学内容的记忆和理解明显加深。因此，以写作作">
+<meta name="keywords" content="认知方法论,认知">
+<meta property="og:type" content="article">
+<meta property="og:title" content="认知的缺陷（上）">
+<meta property="og:url" content="http://yoursite.com/2020/01/22/cognitive-methods-1/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言这个系列文章作为对学习吴伯凡老师的课程《认知方法论》的总结和思考。感兴趣的朋友可以在得到APP上搜索吴伯凡老师的课程以及我的笔记。这是门年度课程，正课部分有两百多篇文章，加上复习和答疑，总共有三百多篇。可以说，每一篇的内容都会引人思考，比较耐读。 我前后学习了两遍，第一遍以听为主，印象不是很深刻；第二遍坚持在正课下留言写笔记，前后也有5万字左右，对所学内容的记忆和理解明显加深。因此，以写作作">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/01/22/cognitive-methods-1/abstract-1.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/01/22/cognitive-methods-1/thinking.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/01/22/cognitive-methods-1/hacker.png">
+<meta property="og:updated_time" content="2020-11-10T02:32:41.953Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="认知的缺陷（上）">
+<meta name="twitter:description" content="引言这个系列文章作为对学习吴伯凡老师的课程《认知方法论》的总结和思考。感兴趣的朋友可以在得到APP上搜索吴伯凡老师的课程以及我的笔记。这是门年度课程，正课部分有两百多篇文章，加上复习和答疑，总共有三百多篇。可以说，每一篇的内容都会引人思考，比较耐读。 我前后学习了两遍，第一遍以听为主，印象不是很深刻；第二遍坚持在正课下留言写笔记，前后也有5万字左右，对所学内容的记忆和理解明显加深。因此，以写作作">
+<meta name="twitter:image" content="http://yoursite.com/2020/01/22/cognitive-methods-1/abstract-1.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/01/22/cognitive-methods-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>认知的缺陷（上） | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/22/cognitive-methods-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          认知的缺陷（上）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-22 20:51:31" itemprop="dateCreated datePublished" datetime="2020-01-22T20:51:31+08:00">2020-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:41" itemprop="dateModified" datetime="2020-11-10T10:32:41+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书/" itemprop="url" rel="index">
+                    <span itemprop="name">读书</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/01/22/cognitive-methods-1/" class="post-meta-item leancloud_visitors" data-flag-title="认知的缺陷（上）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/01/22/cognitive-methods-1/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/01/22/cognitive-methods-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/2020/01/22/cognitive-methods-1/abstract-1.jpg" alt="head"></p>
+<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>这个系列文章作为对学习吴伯凡老师的课程《认知方法论》的总结和思考。感兴趣的朋友可以在得到APP上搜索吴伯凡老师的课程以及我的笔记。这是门年度课程，正课部分有两百多篇文章，加上复习和答疑，总共有三百多篇。可以说，每一篇的内容都会引人思考，比较耐读。</p>
+<p>我前后学习了两遍，第一遍以听为主，印象不是很深刻；第二遍坚持在正课下留言写笔记，前后也有5万字左右，对所学内容的记忆和理解明显加深。因此，以写作作为输出手段，对学习效果的提升有显著效果，大家不妨试试看。虽然已经学过两遍，但我觉得还是有必要再以完整文章的形式，对所学的内容再做一次梳理和强化，并结合实际的生活和学习经验，谈谈感受和思考。把这件事情完成，才算是真正学习这门课。</p>
+<p>本文为这个系列文章的第一篇，我们来谈谈认知的缺陷，即认知迭代的必要性。</p>
+<h3 id="认知的缺陷"><a href="#认知的缺陷" class="headerlink" title="认知的缺陷"></a>认知的缺陷</h3><p>吴老师在每篇文章的开头都会说：</p>
+<blockquote>
+<p>”欢迎来到吴伯凡认知方法论，让我们一起认知迭代“。</p>
+</blockquote>
+<p>为什么要认知迭代（升级）呢？这是因为对于绝大多数人来说，<strong>认知是存在缺陷的</strong>。具体有哪些缺陷呢？</p>
+<a id="more"></a>
+<p>首先，<strong>我们对世界的感知很可能不是世界的本来面目</strong>。</p>
+<p>我们的各种感觉就是透明的生产系统。原料是外界的各种刺激，产品就是各类平时我们说的感觉：颜色、气味、味道和疼痛等等。事实上，经过大脑的加工，感觉被具体化成我们人类能理解的概念，如红色、酸味和刺痛等。这已经丢失了事物的本来面目。</p>
+<p>你看到了绿色的树叶，是因为树叶本质上就是绿色的吗？我们如何定义绿色呢？我们能看到绿色，是因为有绿光进入眼球，绿光是波长满足一定条件的电磁波。我们看到一个物体是绿色，是因为它反射的绿光电磁波较多，进入我们眼球后，由视神经和大脑做出的解读。绿色不是树叶的属性，而是电磁波的属性，反射绿光才是树叶的属性。但我们的大脑不会告诉我们这些细节，而是直接根据过往学习的经验告诉我们看到了绿色树叶。说白了，感觉系统输出的是现象而非本质。</p>
+<p><strong>感觉是认知的产品</strong>，既然是产品，大家都可以生产，且工艺可以不同，最终的成品自然有差别。我们对具体事物没有纠纷和争论，是因为我们的感觉对这些事物加工的产品极其类似，以至于我们自己无法分辨。理论上讲，苹果和苹果是不一样的，但大概的样貌都符合绝大多数人的视觉加工结果，大家便没有异议。</p>
+<p>有些抽象事物就不同了，比如道德、信念、概念和理论。这些事物没有实体存在，我们没有专门的感知器官。大脑的理解和分析就会受到已掌握的经验、信息和工具的影响。这相当于生产原材料的配方就不同，加工流程也不同，最后的产出肯定是千差万别，纷争就此开始。试想一下，如果我们的大脑哪天进化出专门分析道德观念的器官，输入一个道德观念，它就独立给出判断结果，那么人和人之前的道德观念差距就会小很多。</p>
+<p><img src="/2020/01/22/cognitive-methods-1/thinking.jpg" alt="think"></p>
+<p>另一个缺陷是 <strong>“刷卡”式的认知</strong>。
+你可能看过丹尼尔·卡尼曼的行为经济学著作《思考，快与慢》，书中系统一和系统二的概念就刻画了我们认知的一些习惯和特点。系统一偏向于使用直觉和本能做出判断、决策和行动。系统二则偏向理性思考，经过分析和推理再得出结论。这里所谓”刷卡“式的认知就有些类似系统一的特点。</p>
+<p>我们常说的”直觉“也可分为先天和后天因素。有一些认知路径和方法是性命攸关的、或者利于进化的，这类方法往往形成类似直觉的东西，帮助我们快速形成反馈，采取行动，比如对甜的食物产生愉悦，对异性的吸引。这些近乎本能的直觉是先天的因素。然而，我们很多所谓的“直觉”和“认知刷卡”是后天形成的。它们不是性命攸关，却关乎我们的判断和决策，比如以偏概全、锚定效应等。一些先天的、生理上的本能，我们几乎无法克服，但对于后天认知上直觉我们却可以加以审视，用理性解决问题。</p>
+<p>如何解决呢？我觉得有两种方法。一是<strong>善于使用批判性思考方法</strong>。这种方法强调审视自己思考过程，看观点、前提、论据、论证、细节到结论的整个流程是不是有漏洞。依赖直觉得出的结论往往在某个环节上有疏漏，这就给我们反思和修正直觉认知的机会。二是<strong>多与高手交流</strong>。所谓当局者迷 旁观者清，普通的旁观者可能仅仅是与你意见相左，而高手却能一针见血地指出要害。当你不太理解高手所说的结论，且他又能够通过论证和解析让你信服，这就是一个认知升级的好机会。经过升级和修正过的认知，我们又会应用于各种场景，久而久之就形成新的脑回路，成为直觉，直到下次升级的机会到来。</p>
+<p><img src="/2020/01/22/cognitive-methods-1/hacker.png" alt="hacker"></p>
+<p>为什么有的人在面对问题时很快就能给出准确有效的答案？这样的人通常会<strong>注意强化某一种认知，提高对特定问题的敏感度，远离游手好闲的学习</strong>。注意，这里说的是某种认知的专一和重复，而非集中注意力。我们可以同时学习很多本领，但具体到某一样时都可以聚精会神不分心，这是集中注意力。但精力总是有限的，即使再认真，每一种本领得到的刻意练习时间必然是有限的，大脑神经元得到的强化效果，就会弱于只学习一种本领的效果。</p>
+<p>记得备战高考时的题海战术，使用的就是这种强化认知的方法。对于某类问题反复地练习，逐渐就会发现问题的模式，并在大脑中强化这类模式。考试遇到类似题目，我们就会很快进行模式识别，给出解题方法。这也是一种”刷卡“能力。值得注意的是，很多人抨击题海战术，实际上反对的是不加以总结的做题，题目做过之后没有形成模式，也就无法强化，每次做题都只如初见一般。你看那些学霸们，他们也是需要大量练习的，只不过可能是他们更善于总结和强化罢了。</p>
+<p>有时候我们还可以利用认知刷卡的特点，达到某种目的。比如它能够迅速攻破一个人的防御，然而刷卡的能力需要长期磨练。病毒要想感染细胞，一定要与细胞膜表面的蛋白质相结合，这就是识别过程。因此，入侵之前就需要先了解，表面蛋白的形态，以此设计自己的形态。但是这个形态可能需要成千上万年的进化才会出现，不是快速学会的。</p>
+<p>广告宣传也类似。“挑好房，就上安居客“，这句广告词铺天盖地，时间久了，一旦你涉及到买房租房的需求，你至少会下个安居客app看看。这句广告词就植入了你的认知系统，让你不假思索地优先选择特定应用程序，而事实上你有很多其他选择。再加上形象代言人的影响力，又植入了一个信任代码，你对该应用的质量更加深信，认知刷卡速度更快了。</p>
+<p>下一篇我们来看看认知还有哪些缺陷。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/认知方法论/" rel="tag"># 认知方法论</a>
+              <a href="/tags/认知/" rel="tag"># 认知</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/01/10/angular-bootstrap-process/" rel="next" title="日拱一卒系列（一）—— Angular启动过程简析">
+                  <i class="fa fa-chevron-left"></i> 日拱一卒系列（一）—— Angular启动过程简析
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/01/27/cognitive-methods-2/" rel="prev" title="认知的缺陷（中）">
+                  认知的缺陷（中） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#认知的缺陷"><span class="nav-number">2.</span> <span class="nav-text">认知的缺陷</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言最近的工作中使用Jenkins进行CI的开发和维护，经常需要调试写好的Jenkinsfile。然而，每次小的改动都需要提交代码，然后push到远端，Jenkins master读取新版本的Jenkinsfile，查看效果。 这样做一来比较麻烦，尤其是频繁改动或者加一些测试代码的时候。另外，有一些feature branch是大家共同开发维护的，经常提交改动会触发不必要的job build，浪费">
+<meta name="keywords" content="Tech,日拱一卒,DevOps,Jenkins,Debug">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Pipeline 手记（2）—— 调试小技巧">
+<meta property="og:url" content="http://yoursite.com/2020/09/25/jenkins-notes-2-debug/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言最近的工作中使用Jenkins进行CI的开发和维护，经常需要调试写好的Jenkinsfile。然而，每次小的改动都需要提交代码，然后push到远端，Jenkins master读取新版本的Jenkinsfile，查看效果。 这样做一来比较麻烦，尤其是频繁改动或者加一些测试代码的时候。另外，有一些feature branch是大家共同开发维护的，经常提交改动会触发不必要的job build，浪费">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200501143531603.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200501143113857.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200501143240342.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020050114380789.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200501144018397.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.180Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Pipeline 手记（2）—— 调试小技巧">
+<meta name="twitter:description" content="引言最近的工作中使用Jenkins进行CI的开发和维护，经常需要调试写好的Jenkinsfile。然而，每次小的改动都需要提交代码，然后push到远端，Jenkins master读取新版本的Jenkinsfile，查看效果。 这样做一来比较麻烦，尤其是频繁改动或者加一些测试代码的时候。另外，有一些feature branch是大家共同开发维护的，经常提交改动会触发不必要的job build，浪费">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200501143531603.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/25/jenkins-notes-2-debug/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Jenkins Pipeline 手记（2）—— 调试小技巧 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/25/jenkins-notes-2-debug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jenkins Pipeline 手记（2）—— 调试小技巧
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-25 15:49:33" itemprop="dateCreated datePublished" datetime="2020-09-25T15:49:33+08:00">2020-09-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/25/jenkins-notes-2-debug/" class="post-meta-item leancloud_visitors" data-flag-title="Jenkins Pipeline 手记（2）—— 调试小技巧" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/25/jenkins-notes-2-debug/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/25/jenkins-notes-2-debug/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>最近的工作中使用Jenkins进行CI的开发和维护，经常需要调试写好的<strong>Jenkinsfile</strong>。然而，每次小的改动都需要提交代码，然后push到远端，Jenkins master读取新版本的Jenkinsfile，查看效果。</p>
+<p>这样做一来比较麻烦，尤其是频繁改动或者加一些测试代码的时候。另外，有一些feature branch是大家共同开发维护的，经常提交改动会触发不必要的job build，浪费资源，也影响其他人开发。这篇文章以此为契机分享一些跟Jenkins调试相关的小技巧。</p>
+<h3 id="Jenkins-Pipeline"><a href="#Jenkins-Pipeline" class="headerlink" title="Jenkins Pipeline"></a>Jenkins Pipeline</h3><p>首先需要明确一点，我使用的Job类型是<strong>Pipeline</strong>，顾名思义，这类Job用于构建一些CI的流水线，在流水线上可以完成一系列的操作，诸如Build，Unit Test，静态代码扫描，打包，上传到Archive，签名，部署等等。在Pipeline上完成的工作比较多，也比较成体系。</p>
+<a id="more"></a>
+<p>还有一种Pipeline称为<strong>multi-branch pipeline</strong>，顾名思义，在这个job的配置中，可以指定来自多个repository的branch。通常一个项目的代码的多个branch都需要CI的工作时，可以采用这个类型。这里不多做介绍，大家可以参考Jenkins官方文档。<br><img src="https://img-blog.csdnimg.cn/20200501143531603.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70" alt="Jenkins Pipeline"><br>每个Pipeline job是通过一个名为<strong>Jenkinsfile</strong>的文件驱动的。这个文件通常位于你项目代码的根目录（如果是multi-branch pipeline，则每个branch都需要有这个文件）。不过，也可以在job的配置中指定这个文件的路径。Jenkinsfile可以使用声明式的语法写，也可以用Jenkins支持的脚本语言（如Groovy）去写，我个人比较倾向于后者，功能比较强大。</p>
+<p>这就回到开篇的问题了，如果我在开发中不停地更改这个Jenkinsfile，就需要反复提交代码触发build，并查看log。有没有比较简捷的方式呢？</p>
+<h3 id="Build-Replay"><a href="#Build-Replay" class="headerlink" title="Build Replay"></a>Build Replay</h3><p>Jenkins的build页面有个replay的功能，它能够加载你上一次build的Jenkinsfile，然后呈现在页面上供你在线修改，之后可以直接以新的Jenkinsfile重新运行上一次的build。很惭愧我至今才发现这个功能。这样，一些简单的调试功能就可以在线上完成，不需要反复提交代码。当调试结束，所有代码功能正常时，再一次性提交。<br><img src="https://img-blog.csdnimg.cn/20200501143113857.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70" alt="Build Replay"><br>有时候我们会有这样的需求，当脚本执行到某一步时，需要暂停一下，去查看某些系统的状态。比如，我想看看Docker image是否上传成功，或者Sonar Scanner的结果是否生成。在使用Replay功能时，可以通过指定input指令做到这一点。<br><img src="https://img-blog.csdnimg.cn/20200501143240342.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70" alt="使用Input指令"></p>
+<h3 id="Pipeline-Steps"><a href="#Pipeline-Steps" class="headerlink" title="Pipeline Steps"></a>Pipeline Steps</h3><p>查看log是一种常见的问题排查方式。然而，如果你的Job执行的任务很多，build生产的log量也比较巨大，那查看完整的log页面的相应速度会很慢，体验会很差。</p>
+<p>另外，我们在写Jenkinsfile时会不免使用并发操作，比如Parallel语句块。那么这些并发操作产生的log就会互相纠缠在一起，调试和排查时也会很痛苦。解决方法有两种：</p>
+<p>一是使用<strong>Blue Ocean</strong>的功能。这个页面会根据Job中不同的阶段来展示相应的log，并发的log也会区分开来。你可以点击相应的Stage图片，查看需要的log。不过当你的log量巨大时，Blue Ocean的打开也会很慢。<br><img src="https://img-blog.csdnimg.cn/2020050114380789.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70" alt="Blue Ocean"><br>二是使用<strong>Pipeline Steps</strong>。这个页面会将你的log组织成<strong>树状结构</strong>。树的层次结构大概与代码中的层次结构对应，并且并发操作的log会组织到各自的调用层次中，不会混乱。通过每一个节点后面的表示状态的图标来判断是否有错误发生。这个页面的响应速度不错，当你的log页面打不开时，可以尝试这个方法。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200501144018397.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2p0el9NUFA=,size_16,color_FFFFFF,t_70" alt="Pipeline Steps"></p>
+<h3 id="远程调试"><a href="#远程调试" class="headerlink" title="远程调试"></a>远程调试</h3><p>我一直好奇Jenkins有没有远程调试的方案。类似Visual Studio那样，通过一个代理的服务器，远程调试Azure Cluster上的代码。在Google上找了一圈，貌似没有比较好用的方案。在一些IDE的插件里面也找了找，没有什么收获。</p>
+<p>但我觉得这应该是个比较普遍的需求: 需要知道Jenkins中运行的代码（包括Script和Shared Library）是否正确执行。Replay虽然可以简单调试Jenkinsfile，但不能加断点，对间接引用的库也无能为力。</p>
+<p>参考资料2有一个方案，不过操作起来比较繁琐，需要自己搭建服务器，也只适用于特定场景，大家可以参考。如果有人知道比较好的调试方案，欢迎留言，谢谢。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ol>
+<li><a href="https://notes.asaleh.net/posts/debugging-jenkins-pipeline/" target="_blank" rel="noopener">https://notes.asaleh.net/posts/debugging-jenkins-pipeline/</a></li>
+<li><a href="https://www.gee-whiz.de/2018/remote-debugging/" target="_blank" rel="noopener">https://www.gee-whiz.de/2018/remote-debugging/</a></li>
+<li><a href="https://www.jenkins.io/doc/book/pipeline/development/#replay" target="_blank" rel="noopener">https://www.jenkins.io/doc/book/pipeline/development/#replay</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+              <a href="/tags/Debug/" rel="tag"># Debug</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/25/jenkins-notes-1-cps/" rel="next" title="Jenkins Pipeline 手记（1）—— 什么是CPS编程">
+                  <i class="fa fa-chevron-left"></i> Jenkins Pipeline 手记（1）—— 什么是CPS编程
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/25/jenkins-notes-3-checkout/" rel="prev" title="Jenkins Pipeline 手记（3）—— 自定义Checkout的陷阱">
+                  Jenkins Pipeline 手记（3）—— 自定义Checkout的陷阱 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jenkins-Pipeline"><span class="nav-number">2.</span> <span class="nav-text">Jenkins Pipeline</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Build-Replay"><span class="nav-number">3.</span> <span class="nav-text">Build Replay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pipeline-Steps"><span class="nav-number">4.</span> <span class="nav-text">Pipeline Steps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#远程调试"><span class="nav-number">5.</span> <span class="nav-text">远程调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

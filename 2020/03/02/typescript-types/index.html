@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言这篇文章谈谈有关 TypeScript 类型的一些概念和原理。学习资料来源于网络，欢迎讨论。感兴趣的朋友可以阅读参考资料中的原始文章。 如何理解 TypeScript 类型首先，我们可以将TypeScript的类型理解为一组值（Values）的集合。如果变量a属于A类型，那么所有可以赋值给变量a的元素就组成了A类型的集合。例如： 1let a: A;  /* a is of type A *">
+<meta name="keywords" content="Tech,Web Front-end,日拱一卒,TypeScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="日拱一卒系列（二）—— 理解 TypeScript 类型">
+<meta property="og:url" content="http://yoursite.com/2020/03/02/typescript-types/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言这篇文章谈谈有关 TypeScript 类型的一些概念和原理。学习资料来源于网络，欢迎讨论。感兴趣的朋友可以阅读参考资料中的原始文章。 如何理解 TypeScript 类型首先，我们可以将TypeScript的类型理解为一组值（Values）的集合。如果变量a属于A类型，那么所有可以赋值给变量a的元素就组成了A类型的集合。例如： 1let a: A;  /* a is of type A *">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/03/02/typescript-types/abstract.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.278Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日拱一卒系列（二）—— 理解 TypeScript 类型">
+<meta name="twitter:description" content="引言这篇文章谈谈有关 TypeScript 类型的一些概念和原理。学习资料来源于网络，欢迎讨论。感兴趣的朋友可以阅读参考资料中的原始文章。 如何理解 TypeScript 类型首先，我们可以将TypeScript的类型理解为一组值（Values）的集合。如果变量a属于A类型，那么所有可以赋值给变量a的元素就组成了A类型的集合。例如： 1let a: A;  /* a is of type A *">
+<meta name="twitter:image" content="http://yoursite.com/2020/03/02/typescript-types/abstract.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/02/typescript-types/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>日拱一卒系列（二）—— 理解 TypeScript 类型 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/02/typescript-types/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          日拱一卒系列（二）—— 理解 TypeScript 类型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-02 14:06:27" itemprop="dateCreated datePublished" datetime="2020-03-02T14:06:27+08:00">2020-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/03/02/typescript-types/" class="post-meta-item leancloud_visitors" data-flag-title="日拱一卒系列（二）—— 理解 TypeScript 类型" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/03/02/typescript-types/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/02/typescript-types/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/2020/03/02/typescript-types/abstract.jpg" alt="head"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>这篇文章谈谈有关 TypeScript 类型的一些概念和原理。学习资料来源于网络，欢迎讨论。感兴趣的朋友可以阅读参考资料中的原始文章。</p>
+<h2 id="如何理解-TypeScript-类型"><a href="#如何理解-TypeScript-类型" class="headerlink" title="如何理解 TypeScript 类型"></a>如何理解 TypeScript 类型</h2><p>首先，我们可以将TypeScript的类型理解为<strong>一组值（Values）的集合</strong>。如果变量a属于A类型，那么所有可以赋值给变量a的元素就组成了A类型的集合。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a: A;  <span class="comment">/* a is of type A */</span></span><br></pre></td></tr></table></figure>
+
+<p>如果A类型的变量可以赋值给B类型的变量，那么A类型所有可能的实例值也是B类型可能值的一部分。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a: A; <span class="comment">/* A type can be assigned to B type*/</span></span><br><span class="line"><span class="keyword">let</span> b: B = a;</span><br></pre></td></tr></table></figure>
+
+<p>如果是由类型A，B和C的联合（Union）定义的类型ABC，它的可能值的集合就是A，B和C三种类型所有可能值得集合。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ABC = A | B | C;  <span class="comment">/* ABC is union of type A, B, C */</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+<p>我们还可以将类型理解为<strong>一组类型兼容的关系（Type Compatibility Relationships）</strong>。TypeScript定义了一些类型关系，可以在<a href="https://github.com/microsoft/TypeScript/blob/master/doc/spec.md#3.11" target="_blank" rel="noopener">这里</a>找到，文档中定义了诸如子类型、超类型以及赋值兼容性等，也就是说一种类型在什么情况下可以赋值给另一种类型。例如，A类型要想赋值给B类型，需要满足以下某个条件（完整列表见上述文档）：</p>
+<ul>
+<li>A 和 B 是完全相同的类型</li>
+<li>A 或者 B 类型是 <code>any</code></li>
+<li>A 是 <code>Undefined</code> 类型</li>
+<li>其他条件…</li>
+</ul>
+<p>另外，文档中的 <code>Apparent Members</code> 部分就定义了联合类型的兼容性。TypeScript的一个特点是，一个变量在不同的位置可以有不同的静态类型，例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> array: <span class="built_in">any</span>[] = [];</span><br><span class="line">array.push(<span class="number">1234</span>);</span><br><span class="line"><span class="comment">// inferred type: number[]</span></span><br><span class="line">array.push(<span class="string">'abcd'</span>);</span><br><span class="line"><span class="comment">// inferred type: (string | number)[]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="名义（Nominal）类型系统和结构化（Structural）类型系统"><a href="#名义（Nominal）类型系统和结构化（Structural）类型系统" class="headerlink" title="名义（Nominal）类型系统和结构化（Structural）类型系统"></a>名义（Nominal）类型系统和结构化（Structural）类型系统</h2><p>一般来讲，编程语言的类型系统要么属于名义类型系统，要么就是结构化类型系统。二者的区别如下：</p>
+<ul>
+<li>在名义类型系统中，如果说两个类型相等，那么两个类型的名字（identity）一定相同；如果一个类型是另一个类型的子类型，则必须显式声明。常见的采用名义类型系统的编程语言有C++，Java和C#等。</li>
+<li>在结构化类型系统中，如果说两个类型相等，只要它们有相同的结构定义即可（每个字段名字相同，且类型相等）。如果A类型是B类型的子类型，只需要B类型包含所有A类型的字段结构即可。<strong>TypeScript 就采用了结构化的类型系统</strong>。</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> A &#123;</span><br><span class="line">  title = <span class="string">'A'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> B &#123;</span><br><span class="line">  title = <span class="string">'B'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> ab: A = <span class="keyword">new</span> B(); </span><br><span class="line"><span class="comment">// A and B are equal types</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> C &#123;</span><br><span class="line">  title = <span class="string">'C'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> D &#123;</span><br><span class="line">  title = <span class="string">'D'</span>;</span><br><span class="line">  ID = <span class="number">123</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> c: C = <span class="keyword">new</span> D();</span><br><span class="line"><span class="comment">// C is a sub-type of D</span></span><br><span class="line"><span class="keyword">const</span> d: D = <span class="keyword">new</span> C();</span><br><span class="line"><span class="comment">// Error: missing 'ID' in type C but required in type D</span></span><br></pre></td></tr></table></figure>
+
+<p>在上面例子中，A类型与B类型由于具有相同的结构，即是相同的类型。类型D包含了类型C的结构，就可以用来实例化C类型的对象，反过来就会报错。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://2ality.com/2020/02/understanding-types-typescript.html" target="_blank" rel="noopener">https://2ality.com/2020/02/understanding-types-typescript.html</a></li>
+<li><a href="https://github.com/microsoft/TypeScript/blob/master/doc/spec.md#3.11" target="_blank" rel="noopener">https://github.com/microsoft/TypeScript/blob/master/doc/spec.md#3.11</a></li>
+<li><a href="https://www.typescriptlang.org/docs/handbook/type-compatibility.html" target="_blank" rel="noopener">https://www.typescriptlang.org/docs/handbook/type-compatibility.html</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Web-Front-end/" rel="tag"># Web Front-end</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/TypeScript/" rel="tag"># TypeScript</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/02/14/cognitive-rules/" rel="next" title="认知的规律">
+                  <i class="fa fa-chevron-left"></i> 认知的规律
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/03/04/git-revert-study/" rel="prev" title="日拱一卒系列（三）—— Git Revert 探究">
+                  日拱一卒系列（三）—— Git Revert 探究 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何理解-TypeScript-类型"><span class="nav-number">2.</span> <span class="nav-text">如何理解 TypeScript 类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#名义（Nominal）类型系统和结构化（Structural）类型系统"><span class="nav-number">3.</span> <span class="nav-text">名义（Nominal）类型系统和结构化（Structural）类型系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

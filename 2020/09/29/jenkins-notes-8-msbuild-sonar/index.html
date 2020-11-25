@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="问题最近工作中有这样的需求，需要针对MSBuild的项目，在pipeline中使用SonarQube进行静态代码分析。这就需要用到 SonarScanner For MSBuild 这个版本的扫描工具。如果直接在Jenkins的虚拟机节点上运行Build和Sonar Scan，没有问题。不过我们的Build是在Docker container中运行的，pipeline会启动一个windows co">
+<meta name="keywords" content="Tech,日拱一卒,DevOps,Jenkins,SonarQube">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner">
+<meta property="og:url" content="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="问题最近工作中有这样的需求，需要针对MSBuild的项目，在pipeline中使用SonarQube进行静态代码分析。这就需要用到 SonarScanner For MSBuild 这个版本的扫描工具。如果直接在Jenkins的虚拟机节点上运行Build和Sonar Scan，没有问题。不过我们的Build是在Docker container中运行的，pipeline会启动一个windows co">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/errors.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/sonars.png">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.183Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner">
+<meta name="twitter:description" content="问题最近工作中有这样的需求，需要针对MSBuild的项目，在pipeline中使用SonarQube进行静态代码分析。这就需要用到 SonarScanner For MSBuild 这个版本的扫描工具。如果直接在Jenkins的虚拟机节点上运行Build和Sonar Scan，没有问题。不过我们的Build是在Docker container中运行的，pipeline会启动一个windows co">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/errors.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/29/jenkins-notes-8-msbuild-sonar/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-29 09:45:41" itemprop="dateCreated datePublished" datetime="2020-09-29T09:45:41+08:00">2020-09-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/29/jenkins-notes-8-msbuild-sonar/" class="post-meta-item leancloud_visitors" data-flag-title="Jenkins Pipeline 手记（8）—— 踩坑 Docker + MSBuild + SonarScanner" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/29/jenkins-notes-8-msbuild-sonar/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/29/jenkins-notes-8-msbuild-sonar/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>最近工作中有这样的需求，需要针对MSBuild的项目，在pipeline中使用SonarQube进行静态代码分析。这就需要用到 <a href="https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-msbuild/" target="_blank" rel="noopener">SonarScanner For MSBuild</a> 这个版本的扫描工具。如果直接在Jenkins的虚拟机节点上运行Build和Sonar Scan，没有问题。不过我们的Build是在Docker container中运行的，pipeline会启动一个windows container，其中包含了MSBuild和msbuld-sonarscanner等工具。在Sonar阶段就会遇到以下问题：</p>
+<p><img src="/2020/09/29/jenkins-notes-8-msbuild-sonar/errors.png" alt="error"></p>
+<a id="more"></a>
+<p>从Log中的<code>possible causes</code>可以看出，原因可能有四种。这里要补充一下MSBuild SonarScanner的一些背景，这个工具分三步执行：<code>Begin -&gt; Build -&gt; End</code>。首先运行sonar scanner的<code>begin</code>阶段，做一些预处理的工作，生成必要的临时目录，读取配置文件。然后进入项目的Build阶段，此时会调用MSBuild工具去Build某个solution或者project。最后是Sonar Scanner的<code>End</code>阶段，这里会真正扫描并分析代码。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>MSBuild项目特殊的地方就在于扫描分析依赖于Build过程，正如上面第1点建议所说，Build必须在Begin和End步骤之间进行。我接着检查了其他三点，发现只有第三点是可疑的，即<strong>三个步骤需要在同一个目录下进行</strong>。</p>
+<p>我在CI中使用了自己定义的一个pipeline模板，该模板在三个不同阶段会分别启动container完成任务，不过我在三个阶段使用了相同的container，且都在container启动时将当前workspace的路径mount到container相应的路径，因此可以保证三个阶段是在同一路径下进行的。那么问题的原因是什么呢？</p>
+<p>于是我进一步分析一下每个阶段的Log，比如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker run -d -t -v C:\jenkins\:C:\jenkins -w C:/jenkins/workspace/...</span></span><br></pre></td></tr></table></figure>
+
+<p>每次Jenkins的Docker插件都会通过上面的命令启动container，并装载当前的workspace。由于指定了<code>-d</code>参数，container是在后台运行的，后续应该还会使用<code>exec</code>命令执行需要的操作。在Build或者Sonar执行结束后：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker stop --time=1 48d4XXX</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker rm -f 48d4XXX</span></span><br></pre></td></tr></table></figure>
+
+<p>即每次都会退出并删除container。问题可能就出在这里，每次container退出，那么一些命令执行的上下文就失效了。不过由于我们装载了workspace，凡是在当前workspace改动的目录和文件就得到了保持。那么问题应该出现在workspace以外的路径。</p>
+<p>我又尝试着在同一个container里面运行了begin和build，以及build和end阶段，发现<strong>begin和build必须在同一个container，而end可以在新的container中</strong>。这就说明，MSBuild SonarScanner在Begin阶段写了workspace以外的目录，然后在Build阶段会被MSBuild工具读取。</p>
+<p>在本地执行sonar scan的Log印证了我的猜想：</p>
+<p><img src="/2020/09/29/jenkins-notes-8-msbuild-sonar/sonars.png" alt="sonar"><br>Scanner在进行预处理时会<strong>将跟SonarQube相关的targets文件写到当前User的Local目录下</strong>，而这些目录是没有被Docker装载的，且MSBbuild在执行时会读取，并运行相应的task：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SonarQubeCategoriseProject:</span><br><span class="line">  Sonar: (msBuildTests.csproj) Categorizing project as test or product code...</span><br><span class="line">  Sonar: (msBuildTests.csproj) project has the MSTest project type guid -&gt; test project</span><br><span class="line">  Sonar: (msBuildTests.csproj) Project categorized. SonarQubeTestProject=true</span><br><span class="line">CreateProjectSpecificDirs:</span><br><span class="line">  Creating directory "E:\Projects\test\.sonarqube\conf\1".</span><br><span class="line">SonarQubeImportBeforeInfo:</span><br><span class="line">  Sonar: (msBuildTests) SonarQube.Integration.ImportBefore.targets was loaded</span><br></pre></td></tr></table></figure>
+
+<p>而如果在全新的container运行MSBuild，就不会出现上述的Log，紧接着在End阶段就会出错。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>找到了原因后，解决方案就很自然：修改pipeline的模板，使得MSBuild Sonar Scan的<code>begin</code>和<code>build</code>阶段在同一个container内执行。</p>
+<p>当然还有另一个思路，就是在每次启动新的container时，都把scanner用到的所有路径通过<code>-v</code>指令装载，不过这很依赖于Sonar Scanner的实现，不是一个扩展性好的做法。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-msbuild/" target="_blank" rel="noopener">https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-msbuild/</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+              <a href="/tags/SonarQube/" rel="tag"># SonarQube</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/28/python-sequence-add-mul/" rel="next" title="Python序列：+和*的微妙之处">
+                  <i class="fa fa-chevron-left"></i> Python序列：+和*的微妙之处
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/29/alone-together-notes/" rel="prev" title="《群体性孤独》读后">
+                  《群体性孤独》读后 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-number">3.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

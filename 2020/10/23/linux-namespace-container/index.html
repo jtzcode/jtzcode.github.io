@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="前言本文来谈谈Linux命名空间的机制，以及基于该机制的容器技术是如何实现的。 容器技术我们如果想共享硬件资源，直接的方法是采用虚拟机技术。每台虚拟机可以分配到一定的硬件资源，有独立的操作系统。有时候，我们还想共享操作系统的内核，在更高的层次实现资源的共享和隔离，这就需要容器技术。 以Linux操作系统为例，如果我们想让不同的进程运行在同一个操作系统上，却能看到和使用不同的系统视图和系统资源，Li">
+<meta name="keywords" content="Tech,后端,服务器,Linux,容器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux命名空间与容器技术浅谈">
+<meta property="og:url" content="http://yoursite.com/2020/10/23/linux-namespace-container/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="前言本文来谈谈Linux命名空间的机制，以及基于该机制的容器技术是如何实现的。 容器技术我们如果想共享硬件资源，直接的方法是采用虚拟机技术。每台虚拟机可以分配到一定的硬件资源，有独立的操作系统。有时候，我们还想共享操作系统的内核，在更高的层次实现资源的共享和隔离，这就需要容器技术。 以Linux操作系统为例，如果我们想让不同的进程运行在同一个操作系统上，却能看到和使用不同的系统视图和系统资源，Li">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/10/23/linux-namespace-container/ns-fork.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/10/23/linux-namespace-container/ns-struct.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.188Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux命名空间与容器技术浅谈">
+<meta name="twitter:description" content="前言本文来谈谈Linux命名空间的机制，以及基于该机制的容器技术是如何实现的。 容器技术我们如果想共享硬件资源，直接的方法是采用虚拟机技术。每台虚拟机可以分配到一定的硬件资源，有独立的操作系统。有时候，我们还想共享操作系统的内核，在更高的层次实现资源的共享和隔离，这就需要容器技术。 以Linux操作系统为例，如果我们想让不同的进程运行在同一个操作系统上，却能看到和使用不同的系统视图和系统资源，Li">
+<meta name="twitter:image" content="http://yoursite.com/2020/10/23/linux-namespace-container/ns-fork.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/10/23/linux-namespace-container/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Linux命名空间与容器技术浅谈 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/23/linux-namespace-container/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux命名空间与容器技术浅谈
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-23 10:35:44" itemprop="dateCreated datePublished" datetime="2020-10-23T10:35:44+08:00">2020-10-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/10/23/linux-namespace-container/" class="post-meta-item leancloud_visitors" data-flag-title="Linux命名空间与容器技术浅谈" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/10/23/linux-namespace-container/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/23/linux-namespace-container/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文来谈谈Linux命名空间的机制，以及基于该机制的容器技术是如何实现的。</p>
+<h2 id="容器技术"><a href="#容器技术" class="headerlink" title="容器技术"></a>容器技术</h2><p>我们如果想共享硬件资源，直接的方法是采用虚拟机技术。每台虚拟机可以分配到一定的硬件资源，有独立的操作系统。有时候，我们还想共享操作系统的内核，在更高的层次实现资源的共享和隔离，这就需要容器技术。</p>
+<p>以Linux操作系统为例，如果我们想让不同的进程运行在同一个操作系统上，却能看到和使用不同的<strong>系统视图和系统资源</strong>，Linux分别提供了两种实现方法：<strong>Linux命名空间和Linux控制组（cgroups）</strong>。系统视图是指一个进程可以看到的系统相关的信息，如文件、进程、网络接口、主机名等。系统资源则是只具体的硬件资源，如CPU、内存、网络带宽等。</p>
+<p>一个容器其实就是<strong>对应不同类型资源的命名空间的集合</strong>，这个集合构成一个系统视图，也可以将容器视为一种轻量级的虚拟机。想要理解容器，首先要理解Linux命名空间。主流的容器技术如Docker，就是基于Linux命名空间实现的。</p>
+<p><code>cgroups</code> (Linux Control Groups) 也是Linux内核的功能，用来限制一个进程的资源使用量，这使得一个进程不能过分使用资源导致其他进程无资源可用。</p>
+<a id="more"></a>
+<h2 id="Linux命名空间"><a href="#Linux命名空间" class="headerlink" title="Linux命名空间"></a>Linux命名空间</h2><p>Linux系统在默认情况下只有一个命名空间，开发者可以创建额外的命名空间来组织不同的资源，形成不同的<strong>视图</strong>。这里所说的资源指的是操作系统相关的信息（文件、进程、主机等），具体类别如下：</p>
+<ul>
+<li>UTS</li>
+<li>User</li>
+<li>Process ID</li>
+<li>Inter-Process Communication（IPC)</li>
+<li>Network</li>
+<li>Mount</li>
+</ul>
+<p>每个进程可以属于不同类型的多个命名空间，表示该进程可以看到所在命名空间定义的系统资源。比如，进程A处于Network命名空间N中，那么A只能看到N内部的网络接口。进程A还可以同时属于UTS命名空间U，这意味着A只能看见U定义的主机名和域名信息。处于同一PID命名空间的进程共享相同的进程树，而只有处于同一IPC命名空间的进程之间才可以进行通信。</p>
+<p>每个容器都有一组命名空间，定义各类系统资源的访问范围，身处其中的进程就只能访问容器内部的资源，这就是容器实现的资源隔离。</p>
+<p>下图展示了Linux命名空间的父子关系：</p>
+<p><img src="/2020/10/23/linux-namespace-container/ns-fork.jpg" alt="ns"></p>
+<p>可以看到，每个命名空间都来自一个父命名空间，而进程在父子命名空间中可以有不同的进程ID，形成映射关系。</p>
+<p>在Linux中，新的命名空间可以通过以下方法创建：</p>
+<ol>
+<li>在<code>fork</code>或者<code>clone</code>系统调用的选项中，指定与父进程共享命名空间，或者建立新的命名空间。</li>
+<li>使用<code>unshare(2)</code>系统调用将进程的某些部分（如命名空间）从父进程分离。</li>
+</ol>
+<p>还可以使用<code>setns(2)</code>系统调用让当前进程加入已有命名空间。</p>
+<p>下图展示了进程与命名空间在实现上的关系：</p>
+<p><img src="/2020/10/23/linux-namespace-container/ns-struct.jpg" alt="ns"></p>
+<p>每个进程结构都有一个指向<code>nsproxy</code>结构对象的指针，而每个<code>nsproxy</code>对象定义了一些进程所属的各类命名空间。其中每一类命名空间的定义也是保留一个指针，指向真正的命名空间结构。可以看到，一个<code>nsproxy</code>定义可以被多个进程共享，这也意味着修改指定的命名空间，与其关联的所有进程都会受到影响。</p>
+<p>内核在fork或者clone进程时会检查如下标志位：<code>CLONE_NEWNS</code>, <code>CLONE_NEWUTS</code>, <code>CLONE_NEWIPC</code>, <code>CLONE_NEWPID</code>, <code>CLONE_NEWNET</code>, <code>CLONE_NEWUSER</code> 以及 <code>CLONE_NEWCGROUP</code>。据此判断是否需要创建命名空间及其类型。</p>
+<p>Linux命名空间成为各类容器技术的基础，而后者又在基于容器的各种云平台上广泛运用，比如Kubernetes。掌握Linux命名空间的一些原理和细节，对熟练使用K8S Pods等上层功能十分有益。后面的文章打算从实践的角度继续学习Linux命名空间和容器技术。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>Kubernetes In Action</li>
+<li>深入Linux内核架构</li>
+<li><a href="https://man7.org/linux/man-pages/man2/unshare.2.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man2/unshare.2.html</a></li>
+<li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/namespaces.7.html</a></li>
+<li><a href="https://www.linuxjournal.com/content/everything-you-need-know-about-linux-containers-part-i-linux-control-groups-and-process" target="_blank" rel="noopener">https://www.linuxjournal.com/content/everything-you-need-know-about-linux-containers-part-i-linux-control-groups-and-process</a></li>
+<li><a href="https://medium.com/@teddyking/linux-namespaces-850489d3ccf" target="_blank" rel="noopener">https://medium.com/@teddyking/linux-namespaces-850489d3ccf</a></li>
+<li><a href="https://medium.com/@teddyking/namespaces-in-go-basics-e3f0fc1ff69a" target="_blank" rel="noopener">https://medium.com/@teddyking/namespaces-in-go-basics-e3f0fc1ff69a</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/后端/" rel="tag"># 后端</a>
+              <a href="/tags/服务器/" rel="tag"># 服务器</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/容器/" rel="tag"># 容器</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/10/01/life-algorithm-2/" rel="next" title="人生的算法（下）">
+                  <i class="fa fa-chevron-left"></i> 人生的算法（下）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/11/10/why-groovy-different-types/" rel="prev" title="Groovy有何不同 —— 类型篇">
+                  Groovy有何不同 —— 类型篇 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器技术"><span class="nav-number">2.</span> <span class="nav-text">容器技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux命名空间"><span class="nav-number">3.</span> <span class="nav-text">Linux命名空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="背景在Jenkins Pipeline里面，我们经常会使用powershell脚本执行一些必要操作，比如Build项目、部署Service、配置网络等等。有时候我们还需要进行远程的操作，比如当目标机器是另一台虚拟机，或者是一个K8S的节点。本文探讨一个在远程执行powershell命令时遇到的小问题。 问题重现我的项目里有一个需求是，将build出来的service部署到远端的server上。部署">
+<meta name="keywords" content="Tech,日拱一卒,DevOps,Jenkins">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Pipeline 手记（4）—— 远程Powershell权限困局">
+<meta property="og:url" content="http://yoursite.com/2020/09/26/jenkins-notes-4-powershell/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="背景在Jenkins Pipeline里面，我们经常会使用powershell脚本执行一些必要操作，比如Build项目、部署Service、配置网络等等。有时候我们还需要进行远程的操作，比如当目标机器是另一台虚拟机，或者是一个K8S的节点。本文探讨一个在远程执行powershell命令时遇到的小问题。 问题重现我的项目里有一个需求是，将build出来的service部署到远端的server上。部署">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.181Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Pipeline 手记（4）—— 远程Powershell权限困局">
+<meta name="twitter:description" content="背景在Jenkins Pipeline里面，我们经常会使用powershell脚本执行一些必要操作，比如Build项目、部署Service、配置网络等等。有时候我们还需要进行远程的操作，比如当目标机器是另一台虚拟机，或者是一个K8S的节点。本文探讨一个在远程执行powershell命令时遇到的小问题。 问题重现我的项目里有一个需求是，将build出来的service部署到远端的server上。部署">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/26/jenkins-notes-4-powershell/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Jenkins Pipeline 手记（4）—— 远程Powershell权限困局 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/26/jenkins-notes-4-powershell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jenkins Pipeline 手记（4）—— 远程Powershell权限困局
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-26 16:49:44" itemprop="dateCreated datePublished" datetime="2020-09-26T16:49:44+08:00">2020-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/26/jenkins-notes-4-powershell/" class="post-meta-item leancloud_visitors" data-flag-title="Jenkins Pipeline 手记（4）—— 远程Powershell权限困局" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/26/jenkins-notes-4-powershell/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/26/jenkins-notes-4-powershell/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在Jenkins Pipeline里面，我们经常会使用powershell脚本执行一些必要操作，比如Build项目、部署Service、配置网络等等。有时候我们还需要进行远程的操作，比如当目标机器是另一台虚拟机，或者是一个K8S的节点。本文探讨一个在远程执行powershell命令时遇到的小问题。</p>
+<h2 id="问题重现"><a href="#问题重现" class="headerlink" title="问题重现"></a>问题重现</h2><p>我的项目里有一个需求是，将build出来的service部署到远端的server上。部署的过程其实就是文件拷贝的过程，在部署前需要调用<code>Get-Service</code> 判断service是否存在，以及用<code>Stop-Service</code>停止正在执行的service。这两个powershell脚本的调用出了问题。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-Service</span> <span class="variable">$service</span> -ComputerName <span class="variable">$server</span> -ErrorAction SilentlyContinue | <span class="built_in">Stop-Service</span> -ErrorAction SilentlyContinue</span><br></pre></td></tr></table></figure>
+
+<p>复杂性在于，<strong>这条命令在一个Jenkins的静态slave结点上执行没有问题，而在一个动态分配的slave结点（如K8S Cloud）上执行就会报如下错误</strong>：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-Service</span> : Cannot open Service Control Manager on computer <span class="string">'10.1.x.x'</span>. This operation might require other privileges.</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+<h2 id="分析与尝试"><a href="#分析与尝试" class="headerlink" title="分析与尝试"></a>分析与尝试</h2><p>这看起来是执行这条命令的权限不够，这可以理解，毕竟是在远端机器执行。因此可以得出结论，在静态的slave上应该是配置了针对远端机器的credential信息，而动态slave上显然没有。添加credential的方法如下：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmdkey /add:<span class="number">10.1</span>.x.x /user:admin /pass:password</span><br></pre></td></tr></table></figure>
+
+<p>我在部署脚本前执行上面的命令添加credential，并没有效果，问题依旧。由此，推测credential并没有添加成功，或者添加方式有问题。比如，我试了在user前面加上<code>.\</code>的域符号，没有效果。</p>
+<p>会不会是使用cmdkey的方式在docker container里不生效呢？毕竟K8S的动态节点环境本质还是在Docker container里面。我想试试直接将credential对象传递给脚本方法，而<code>Get-Service</code> 方法本身并不支持传递credential，因此我找到了<code>Invoke-Comand</code>方法。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Invoke-Command</span> -ComputerName <span class="number">10.1</span>.x.x -Credential (Get-StoredCredential -Target <span class="variable">$cred</span>) -ScriptBlock &#123;<span class="built_in">Get-Service</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的<code>$cred</code>可以通过如下方式生成：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Import-Module</span> CredentialManager</span><br><span class="line"><span class="variable">$cred</span> = New-StoredCredential -Persist LOCAL_MACHINE -Target cred -UserName admin -Password pass</span><br></pre></td></tr></table></figure>
+
+<p>然而，这样调用<code>Get-Service</code>会报另一个错：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ERROR:  ACCESS IS DENIED</span><br><span class="line">ERROR: The connection to the remote host was refused. Verify that the</span><br><span class="line">WS-Management service is running on the remote host and configured to</span><br><span class="line">listen <span class="keyword">for</span> requests on the correct port and HTTP URL.</span><br></pre></td></tr></table></figure>
+
+<p>通过查看微软的<a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_troubleshooting?view=powershell-7" target="_blank" rel="noopener">帮助文档</a>，可以获得这个错误的可能原因。据此，我又尝试了几种方法：</p>
+<ul>
+<li>可能是Server端没有开启remote powershell的功能，需要运行：<code>Enable-PSRemoting</code></li>
+<li>可能是Server不在Client的信任列表里，尝试执行：<code>Set-Item WSMan:\\localhost\\Client\\TrustedHosts -Value 10.1.x.x -Force</code></li>
+<li>可能需要允许使用client credential访问远程机器，尝试运行：<code>Enable-WSManCredSSP -Role Client -DelegateComputer 10.1.x.x -Force</code></li>
+</ul>
+<p>这些方法都不能解决拒绝访问，或者开始提到的权限问题。看来另有原因。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>最后我又回归到原点思考，根本原因可能还是credential本身的添加方式有问题，而不是网络通信的问题。</p>
+<p>既然password不太可能出问题，那么user的写法呢？我尝试了<strong>使用具体的ip地址作为域名</strong>，取代<code>.\</code>，终于解决了问题！</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmdkey /add:<span class="number">10.1</span>.x.x /user:<span class="number">10.1</span>.x.x\admin /pass:password</span><br></pre></td></tr></table></figure>
+
+<p>注意，如果是Jenkins的powershell插件，命令出现的<code>\</code>和<code>$</code>都需要转义。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>一些技术问题，会随着研究的深入而陷入死胡同，或者偏离原来的方向，利正真的解决方案越来越远。当然，深入研究是可取的，不过解决问题有时候才是第一要务。在解决问题过程中，适当地停下来问问自己，我最开始要解决的问题到底是什么？</p>
+<p>扩展资料：</p>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_troubleshooting?view=powershell-7" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_troubleshooting?view=powershell-7</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/25/jenkins-notes-3-checkout/" rel="next" title="Jenkins Pipeline 手记（3）—— 自定义Checkout的陷阱">
+                  <i class="fa fa-chevron-left"></i> Jenkins Pipeline 手记（3）—— 自定义Checkout的陷阱
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/26/jenkins-notes-5-dind/" rel="prev" title="Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿">
+                  Jenkins Pipeline 手记（5）—— Docker In Docker 那些事儿 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题重现"><span class="nav-number">2.</span> <span class="nav-text">问题重现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析与尝试"><span class="nav-number">3.</span> <span class="nav-text">分析与尝试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">4.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">5.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文原载于： https://www.robinwieruch.de/web-components-tutorial/作者：Robin Wieruch原文标题：Web Components Tutorial for Beginners [2019]  前言译者注：Web Component可以译为Web组件，不过也可以不翻译，从业者都能看懂，故后面译文都保留原词。 在这个教程中你能够学到，如何构建">
+<meta name="keywords" content="Tech,Web Front-end">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2019年 Web Component 入门教程（译）">
+<meta property="og:url" content="http://yoursite.com/2019/07/10/web-component-tutorial-2019/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="本文原载于： https://www.robinwieruch.de/web-components-tutorial/作者：Robin Wieruch原文标题：Web Components Tutorial for Beginners [2019]  前言译者注：Web Component可以译为Web组件，不过也可以不翻译，从业者都能看懂，故后面译文都保留原词。 在这个教程中你能够学到，如何构建">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.289Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2019年 Web Component 入门教程（译）">
+<meta name="twitter:description" content="本文原载于： https://www.robinwieruch.de/web-components-tutorial/作者：Robin Wieruch原文标题：Web Components Tutorial for Beginners [2019]  前言译者注：Web Component可以译为Web组件，不过也可以不翻译，从业者都能看懂，故后面译文都保留原词。 在这个教程中你能够学到，如何构建">
+
+<link rel="canonical" href="http://yoursite.com/2019/07/10/web-component-tutorial-2019/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>2019年 Web Component 入门教程（译） | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/10/web-component-tutorial-2019/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2019年 Web Component 入门教程（译）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-07-10 20:46:51" itemprop="dateCreated datePublished" datetime="2019-07-10T20:46:51+08:00">2019-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/07/10/web-component-tutorial-2019/" class="post-meta-item leancloud_visitors" data-flag-title="2019年 Web Component 入门教程（译）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2019/07/10/web-component-tutorial-2019/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/07/10/web-component-tutorial-2019/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文原载于： <a href="https://www.robinwieruch.de/web-components-tutorial/" target="_blank" rel="noopener">https://www.robinwieruch.de/web-components-tutorial/</a><br>作者：<strong>Robin Wieruch</strong><br>原文标题：<strong>Web Components Tutorial for Beginners [2019]</strong></p>
+<hr>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p><em>译者注：Web Component可以译为Web组件，不过也可以不翻译，从业者都能看懂，故后面译文都保留原词。</em></p>
+<p>在这个教程中你能够学到，如何构建第一个Web Component，以及如何将其运用在你的Web应用中。在我们开始前，先花点时间总体上了解下Web Component。近年来，Web Components，也称为自定义元素（Custom Elements），已经成为一些浏览器的标准API（参考<a href="https://caniuse.com/#feat=custom-elementsv1" target="_blank" rel="noopener">这里</a>），它让开发者能仅仅使用HTML，CSS，和JavaScript实现可重用的组件，而不需要依赖主流的前端框架如React，Angular和Vue。具体来说，自定义元素将页面的结构（HTML），样式（CSS）以及行为（JavaScript）封装为一个自定义HTML元素。例如，下面代码片段是一个HTML下拉列表组件的例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-dropdown</span></span></span><br><span class="line"><span class="tag">  <span class="attr">label</span>=<span class="string">"Dropdown"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">option</span>=<span class="string">"option2"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">options</span>=<span class="string">'&#123; "option1": &#123; "label": "Option 1" &#125;, "option2": &#123; "label": "Option 2" &#125; &#125;'</span></span></span><br><span class="line"><span class="tag">&gt;</span><span class="tag">&lt;/<span class="name">my-dropdown</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在本教程中，我们将使用Web Component从头实现一个下拉列表组件。然后你可以在自己的应用或者其他地方重用这个组件，甚至可以在一些框架中使用，比如React（参考<a href="https://github.com/the-road-to-learn-react/use-custom-element" target="_blank" rel="noopener">这里</a>）。</p>
+<h3 id="为什么需要Web-Components？"><a href="#为什么需要Web-Components？" class="headerlink" title="为什么需要Web Components？"></a>为什么需要Web Components？</h3><p>这里通过一个个人案例来解释Web Components的益处：不同职能的开发团队需要基于一个样式指南（Style Guide）创建一个UI库，但是有两个团队在实现组件时候采用了各自不同的框架：React和Angular。尽管两种实现都遵循样式指南，且组件的结构（HTML）和样式（CSS）上基本相同，但是组件的行为（比如，打开/收起下拉列表，选择列表的一项）是依据各自框架下的JavaScript的逻辑实现的。另外，一旦样式指南中有关于组件样式或行为的错误，每个团队会独立地修复这些问题，且并不一定能保证向后兼容。很快，两个团队的UI库就会在外观和行为上产生分歧。</p>
+<a id="more"></a>
+
+<p><em>作者注：这个错误与Web Components无关，而是一个样式指南中的常见错误。开发者可能在开发中不是积极地使用并更新该指南，而是仅仅作为文档参考一下，这样指南早晚会过期。</em></p>
+<p>最终，两个团队坐到一起讨论如何解决这个问题，并让我研究一下Web Component是否能解决。Web Component的确提供了一个令人信服的解决方案：两个团队使用标准的Web Components来实现需要组件，且仅仅使用HTML，CSS和JavaScript实现。这些组件可以在React和Angular应用中使用。如果样式指南发生改变，或者组件的而实现需要修复，两个团队可以协作完成对共享UI库的更新。</p>
+<h3 id="开始学习Web-Components"><a href="#开始学习Web-Components" class="headerlink" title="开始学习Web Components"></a>开始学习Web Components</h3><p>如果你需要一个针对下面教程的初始项目，可以clone<a href="https://github.com/rwieruch/web-components-starter-kit" target="_blank" rel="noopener">这里</a>的GitHub代码。随着教程的进行，你可以在<code>/src</code>和<code>/dist</code>目录下做相应的改动。最终的项目代码可以在<a href="https://github.com/rwieruch/web-components-dropdown" target="_blank" rel="noopener">这里</a>找到。</p>
+<p>现在我们开始构建第一个Web Component。我们不直接实现下拉列表，而是从一个简单的按钮控件开始，这个按钮最后会用到下拉列表上。使用Web Component实现一个简单的按钮听起来不太合理，因为你完全可以使用<code>&lt;button&gt;</code>元素配合一些CSS样式实现，使用按钮只是为了教学起见。下面的代码使用Web Component创建了一个按钮组件，包含了自定义的结构和样式。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> template = <span class="built_in">document</span>.createElement(<span class="string">'template'</span>);</span><br><span class="line"></span><br><span class="line">template.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    .container &#123;</span></span><br><span class="line"><span class="string">      padding: 8px;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    button &#123;</span></span><br><span class="line"><span class="string">      display: block;</span></span><br><span class="line"><span class="string">      overflow: hidden;</span></span><br><span class="line"><span class="string">      position: relative;</span></span><br><span class="line"><span class="string">      padding: 0 16px;</span></span><br><span class="line"><span class="string">      font-size: 16px;</span></span><br><span class="line"><span class="string">      font-weight: bold;</span></span><br><span class="line"><span class="string">      text-overflow: ellipsis;</span></span><br><span class="line"><span class="string">      white-space: nowrap;</span></span><br><span class="line"><span class="string">      cursor: pointer;</span></span><br><span class="line"><span class="string">      outline: none;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">      width: 100%;</span></span><br><span class="line"><span class="string">      height: 40px;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">      box-sizing: border-box;</span></span><br><span class="line"><span class="string">      border: 1px solid #a1a1a1;</span></span><br><span class="line"><span class="string">      background: #ffffff;</span></span><br><span class="line"><span class="string">      box-shadow: 0 2px 4px 0 rgba(0,0,0, 0.05), 0 2px 8px 0 rgba(161,161,161, 0.4);</span></span><br><span class="line"><span class="string">      color: #363636;</span></span><br><span class="line"><span class="string">      cursor: pointer;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  &lt;div class="container"&gt;</span></span><br><span class="line"><span class="string">    &lt;button&gt;Label&lt;/button&gt;</span></span><br><span class="line"><span class="string">  &lt;/div&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">window</span>.customElements.define(<span class="string">'my-button'</span>, Button);</span><br></pre></td></tr></table></figure>
+
+<p>我们一步一步来看。定义一个Web Component需要继承<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement" target="_blank" rel="noopener">HTMLElement</a>这个<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes" target="_blank" rel="noopener">JavaScript类</a>。在派生的类中，你可以访问很多类方法，比如一些组件生命周期回调函数（Lifecycle Callbacks），这些方法能帮助你实现组件的功能。后面你会看到如何使用这些类方法。</p>
+<p>另外，Web Components采用了<a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank" rel="noopener">Shadow DOM</a>机制，这有别于为了性能优化而采用的Virtual DOM技术。Shadow DOM将组件内部的HTML，CSS和JavaScript封装起来，使得这些内容对外部使用该组件的其他组件或者HTML不可见。你可以配置<a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow" target="_blank" rel="noopener">Shadow DOM</a>的模式（mode），比如这里将它的值设为<code>open</code>（ <em>译者注：原为是设置为true，根据文档来看有误</em> ），意思是在某种程度上从外部可以访问到Shadow DOM的root节点。一句话，Shadow DOM 通过在你的自定义元素内部维护自己的DOM子树来实现结构和样式的封装。</p>
+<p>在构造器中还有一条语句，在Shaodow DOM附加一个子节点，内容拷贝自前面已经声明的<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template" target="_blank" rel="noopener">模板</a>。模板通常用来重用HTML代码，而在Web Component中模板的关键作用是，定义了组件所需的结构和样式（参考自定义元素前面的模板声明）。</p>
+<p>上面代码段最后一行将我们的自定义元素作为一个有效元素定义在window对象上。第一个参数是自定元素的HTML标签名，该名字需要有一个横杠（<code>&#39;-&#39;</code>）；第二个参数就是自定义元素对象。今后，我们就可以在HTML中的某处使用这个自定义元素： <code>&lt;my-button&gt;&lt;/my-button&gt;</code> 。注意，自定义元素不能使用自关闭的标签（如<code>&lt;my-button /&gt;</code>）。</p>
+<h3 id="如何向Web-Components传递属性？"><a href="#如何向Web-Components传递属性？" class="headerlink" title="如何向Web Components传递属性？"></a>如何向Web Components传递属性？</h3><p>目前为止，我们的自定义元素除了拥有自己的结构和样式外没什么用处。我们完全可以使用原生的HTML元素结合CSS样式达到同样的目的。不过为了学习Web Component，我们还是继续完善这个自定义按钮元素。目前这个元素显示的内容是写死的，我们能不能尝试传递一个标签字符串作为它的HTML属性呢？比如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-button</span> <span class="attr">label</span>=<span class="string">"Click Me"</span>&gt;</span><span class="tag">&lt;/<span class="name">my-button</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样呈现的按钮的文本还是<code>Label</code>，为了按属性的值显示文本内容，我们可以监听（观察）这个属性的值，然后用它做一些事情，这些可以由继承自HTMLElement类的方法完成：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'label'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(name, oldVal, newVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>[name] = newVal;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次label属性的值改变，<code>attributeChangedCallback</code>方法都会被调用，因为我们在<code>observedAttributes</code>方法中将<code>label</code>属性定义为可观察属性。在这个例子里，我们的回调函数没有做太多事情，仅仅将<code>label</code>挂到Web Component实例上（效果相当于<code>this.label= &#39;Click Me&#39;</code>）。然而，现在按钮还没有呈现这个<code>label</code>的值，为了达到目的你还需要抓取实际的HTML按钮元素并设置它的内容。 <em>（译者注：注意这里使用<code>shadowRoot</code>对象访问内部HTML元素）</em> </p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'label'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(name, oldVal, newVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>[name] = newVal;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.render();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">this</span>.$button.innerHTML = <span class="keyword">this</span>.label;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在<code>label</code>属性的初始值被设置到按钮上，并且，自定义按钮还可以响应属性值的变化。你可以按照这种方式实现其他的属性。这里<code>label</code>属性是字符串类型，然而对于JavaScript中的非原生类型（non-primitives），比如<code>Object</code>和<code>Array</code>，你需要将其转换成JSON字符串后再传递给Web Components。稍后我们在实现下拉列表组件时会遇到这种情况。</p>
+<h3 id="将特性（Properties）反应到属性（Attributes）上"><a href="#将特性（Properties）反应到属性（Attributes）上" class="headerlink" title="将特性（Properties）反应到属性（Attributes）上"></a>将特性（Properties）反应到属性（Attributes）上</h3><p><em>（译者注：这里为了区别于属性，将properties翻译成”特性“ 。你可以简单理解：属性是HTML元素上的字段，特性是对象上通过get/set方法访问的字段。）</em> </p>
+<p>到目前为止，我们使用属性将信息传递到自定义元素上。每当属性值发生改变，我们把改变后的值通过回调函数更新到Web Component实例的特性上，进而呈现出来。然而，我们也可以使用其他方法将属性值反映到特性上：JavaScript的<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Class_body_and_method_definitions" target="_blank" rel="noopener">Get方法</a>。这样，我们无需通过回调函数也能保证拿到最新的属性值，即<code>this.label</code>总是返回从<code>getter</code>函数拿到的最新的值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> label() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.getAttribute(<span class="string">'label'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'label'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(name, oldVal, newVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>.render();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">this</span>.$button.innerHTML = <span class="keyword">this</span>.label;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上就是如何将属性值反应到特性上。然而，我们还可以通过特性（properties）将数据传递给自定义元素。当数据是类似JavaScript对象和数组时，这种方法很常用：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-button</span>&gt;</span><span class="tag">&lt;/<span class="name">my-button</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">  <span class="keyword">const</span> element = <span class="built_in">document</span>.querySelector(<span class="string">'my-button'</span>);</span></span><br><span class="line"><span class="javascript">  element.label = <span class="string">'Click Me'</span>;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>不幸的是，我们通过特性更改数据时，之前的回调函数不会被调用，因为它们只会响应属性的改变。这时，我们需要一个<code>set</code>函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> label() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.getAttribute(<span class="string">'label'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">set</span> label(value) &#123;</span><br><span class="line">    <span class="keyword">this</span>.setAttribute(<span class="string">'label'</span>, value);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'label'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(name, oldVal, newVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>.render();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">this</span>.$button.innerHTML = <span class="keyword">this</span>.label;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，由于我们在外部改变了元素的特性，自定义元素的<code>setter</code>方法会把这个改变反应到属性上，这样一来，回到函数又被调用了，自定义元素也可以重新呈现新的数据了。</p>
+<p>你可以通过在每个方法中打log的方式来理解这些方法调用的顺序。你可以也可以通过浏览器的开发者工具查看DOM上属性的变化：新的属性值应该反应在元素上，即使它是通过特性改变的。</p>
+<p>总的来说，有了<code>getter</code>和<code>setter</code>函数我们可以将信息以属性或者特性的方式传递给自定义元素。这个过程就称为将属性值反应到特性上，反过来也一样。</p>
+<h3 id="如何将函数传递给Web-Components？"><a href="#如何将函数传递给Web-Components？" class="headerlink" title="如何将函数传递给Web Components？"></a>如何将函数传递给Web Components？</h3><p>按钮最基本的功能是我们点击的时候有响应的动作。为了实现这个功能，首先，自定义元素可以注册一个事件监听器对用户的交互操作进行响应。如下面代码所示，我们可以获取button对象并附加一个事件监听器：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button.addEventListener(<span class="string">'click'</span>, () =&gt; &#123;</span><br><span class="line">      <span class="comment">// do something</span></span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> label() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.getAttribute(<span class="string">'label'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">set</span> label(value) &#123;</span><br><span class="line">    <span class="keyword">this</span>.setAttribute(<span class="string">'label'</span>, value);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'label'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(name, oldVal, newVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>.render();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">this</span>.$button.innerHTML = <span class="keyword">this</span>.label;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><em>作者注：你完全可以直接在自定义元素而不是内部的button上添加监听器。然而，在内部添加的好处是你可以对传入监听器的内容进行更多的控制。</em></p>
+<p>这里缺失的部分是外部的一个回调函数 <em>（译者注：即Web Component的用户希望事件发生时所做的处理）</em> ，当事件响应时可以被自定义元素在内部被调用，这可以通过多种方法解决。首先，我们可以把这个函数以属性的方式传递。然而我们已经说过，将非原生类型当作属性传递比较笨重（需要转换成JSON字符串），因此我们要避免这么做。第二种方法就是将函数以特性的方式传递。代码如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-button</span> <span class="attr">label</span>=<span class="string">"Click Me"</span>&gt;</span><span class="tag">&lt;/<span class="name">my-button</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">  <span class="built_in">document</span>.querySelector(<span class="string">'my-button'</span>).onClick = <span class="function"><span class="params">value</span> =&gt;</span></span></span><br><span class="line"><span class="javascript">    <span class="built_in">console</span>.log(value);</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们在自己的元素上声明了一个<code>OnClick</code>函数，后面会在自定义元素的监听器上调用这个函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button.addEventListener(<span class="string">'click'</span>, () =&gt; &#123;</span><br><span class="line">      <span class="keyword">this</span>.onClick(<span class="string">'Hello from within the Custom Element'</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，你可以控制传递给外部回调函数的内容（参数），如果不在内部添加监听器，你就只能收到单击事件，而无法控制事件处理的一些细节，你可以试试看。虽然这个过程能正常工作，但我们希望只利用JavaScript DOM API提供的内置事件系统来实现。因此，我们不在自定义元素上定义特性，而是直接在外部注册一个事件监听器：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-button</span> <span class="attr">label</span>=<span class="string">"Click Me"</span>&gt;</span><span class="tag">&lt;/<span class="name">my-button</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">  <span class="built_in">document</span></span></span><br><span class="line"><span class="javascript">    .querySelector(<span class="string">'my-button'</span>)</span></span><br><span class="line"><span class="javascript">    .addEventListener(<span class="string">'click'</span>, value =&gt; <span class="built_in">console</span>.log(value));</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出跟前边做法一样，只是使用外部事件监听器处理<code>click</code>事件。这样，自定义元素依然可以使用click事件将信息发送到外部，因为自定义元素的内部实现依然发送了消息 <em>（译者注：这里<code>this.onClick</code>需要改成<code>this.onclick</code>调用，因为已经没有特性的定义，需改为内置的事件函数）</em> ，最后在浏览器的控制台log中可以看见结果。</p>
+<p>这里有一个限制是，在自定义元素上我们只能使用内置的事件。然而，如果你后面要在不同的环境（如React）上使用这个组件，你可能需要为你的组件提供自定义事件（比如<code>onClick</code> <em>（译者注：注意区别于内置事件<code>click</code>和处理函数<code>onclick</code>）</em> ）API。当然了，你可以手动将内置的<code>click</code>事件的处理映射到自定义元素的<code>onClick</code>函数上，但是如果能使用内置的命名传统还是更方便的。我们来看看如何在前面基础上使用自定义事件达到目的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$button.addEventListener(<span class="string">'click'</span>, () =&gt; &#123;</span><br><span class="line">      <span class="keyword">this</span>.dispatchEvent(</span><br><span class="line">        <span class="keyword">new</span> CustomEvent(<span class="string">'onClick'</span>, &#123;</span><br><span class="line">          detail: <span class="string">'Hello from within the Custom Element'</span>,</span><br><span class="line">        &#125;)</span><br><span class="line">      );</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在我们向外部暴露了一个自定义事件API，详细信息通过一个可选的<code>detail</code>特性传递。接下来，我们可以监听这个自定义事件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">my-button</span> <span class="attr">label</span>=<span class="string">"Click Me"</span>&gt;</span><span class="tag">&lt;/<span class="name">my-button</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">  <span class="built_in">document</span></span></span><br><span class="line"><span class="javascript">    .querySelector(<span class="string">'my-button'</span>)</span></span><br><span class="line"><span class="javascript">    .addEventListener(<span class="string">'onClick'</span>, value =&gt; <span class="built_in">console</span>.log(value));</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这最后一步使用自定义事件是可选的操作，只是提供了更多实现的可能性，如果它提供了你需要的，也许Web Component使用起来会更加轻松自如。</p>
+<h3 id="Web-Component生命周期回调"><a href="#Web-Component生命周期回调" class="headerlink" title="Web Component生命周期回调"></a>Web Component生命周期回调</h3><p>我们就要完成自定义按钮了。在我们用它实现自定义下拉列表前，还要完成最后一件事情。目前，这个按钮内部有个带有内边距（padding）的容器，这在多个按钮挨着排列时，彼此间形成一定的间距。然而，在其他的上下文，比如在下拉列表中使用该按钮时，你可能需要移除这个内边距。这时，你就可以使用Web Component的其中一个生命周期回调函数<code>connectedCallback</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Button</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._shadowRoot = <span class="keyword">this</span>.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">    <span class="keyword">this</span>._shadowRoot.appendChild(template.content.cloneNode(<span class="literal">true</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.$container = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'.container'</span>);</span><br><span class="line">    <span class="keyword">this</span>.$button = <span class="keyword">this</span>._shadowRoot.querySelector(<span class="string">'button'</span>);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  connectedCallback() &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.hasAttribute(<span class="string">'as-atom'</span>)) &#123;</span><br><span class="line">      <span class="keyword">this</span>.$container.style.padding = <span class="string">'0px'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在我们的例子里，如果元素上有一个名为<code>as-atom</code>的属性，就将容器的内边距设为0。顺便说一下，这就是你在创建一个好的UI库时所遵循的“原子”设计原则。这里的按钮元素可以看作一个原子，而下拉列表可以看作一个分子 <em>（译者注：这是一种自底向上的软件设计方法，可参阅：<a href="https://speckyboy.com/atomic-web-design/）" target="_blank" rel="noopener">https://speckyboy.com/atomic-web-design/）</a></em> 。这些分子元素再往上层最后会形成“组织”。现在，我们的按钮在下拉列表中使用时可以不带内边距：<code>&lt;my-button as-atom&gt;&lt;/my-button&gt;</code>。按钮<code>label</code>属性稍后会设置。</p>
+<p>但是这里<code>connectedCallback</code>生命周期回调什么时候调用呢？答案是每次Web Component被附加到DOM树上时被调用一次。还有一个等价的回调函数叫<code>disconnectedCallback</code>，它在每次Web Component从DOM树移除时调用。之前，你已经使用过<code>attributeChangedCallback</code>这个回调去响应属性值的变化了。Web Component提供的其他生命周期回调可以在 <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#Using_the_lifecycle_callbacks" target="_blank" rel="noopener">这里</a> 找到详细信息。</p>
+<h3 id="Web-Component的嵌套使用"><a href="#Web-Component的嵌套使用" class="headerlink" title="Web Component的嵌套使用"></a>Web Component的嵌套使用</h3>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Web-Front-end/" rel="tag"># Web Front-end</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/06/15/博客计划/" rel="next" title="博客计划">
+                  <i class="fa fa-chevron-left"></i> 博客计划
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/09/25/high-order-functions/" rel="prev" title="什么是高阶函数？你为什么需要关注它？（译）">
+                  什么是高阶函数？你为什么需要关注它？（译） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么需要Web-Components？"><span class="nav-number">2.</span> <span class="nav-text">为什么需要Web Components？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始学习Web-Components"><span class="nav-number">3.</span> <span class="nav-text">开始学习Web Components</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何向Web-Components传递属性？"><span class="nav-number">4.</span> <span class="nav-text">如何向Web Components传递属性？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将特性（Properties）反应到属性（Attributes）上"><span class="nav-number">5.</span> <span class="nav-text">将特性（Properties）反应到属性（Attributes）上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何将函数传递给Web-Components？"><span class="nav-number">6.</span> <span class="nav-text">如何将函数传递给Web Components？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-Component生命周期回调"><span class="nav-number">7.</span> <span class="nav-text">Web Component生命周期回调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-Component的嵌套使用"><span class="nav-number">8.</span> <span class="nav-text">Web Component的嵌套使用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言本文是《持续交付》一书学习总结的最后一篇。主要内容是结合实际中的一些工具和实践，对持续交付这个话题做个总结。  总结：工具和实践持续交付的核心是构建一个部署流水线，这个流水线起始于源代码，终止于用户界面，并长期地、反复地、持续地运行。我们采用持续交付的目的是，更加频繁地发布软件中最新的改动，增加产品迭代的次数，在适应快节奏需求的同时，保证产品的质量。 对于源代码管理，我在项目中经常使用Git，">
+<meta name="keywords" content="持续交付,DevOps">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《持续交付》学习笔记——总结">
+<meta property="og:url" content="http://yoursite.com/2020/01/09/continuous-delivery-part-6/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言本文是《持续交付》一书学习总结的最后一篇。主要内容是结合实际中的一些工具和实践，对持续交付这个话题做个总结。  总结：工具和实践持续交付的核心是构建一个部署流水线，这个流水线起始于源代码，终止于用户界面，并长期地、反复地、持续地运行。我们采用持续交付的目的是，更加频繁地发布软件中最新的改动，增加产品迭代的次数，在适应快节奏需求的同时，保证产品的质量。 对于源代码管理，我在项目中经常使用Git，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/01/09/continuous-delivery-part-6/cd.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.152Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《持续交付》学习笔记——总结">
+<meta name="twitter:description" content="引言本文是《持续交付》一书学习总结的最后一篇。主要内容是结合实际中的一些工具和实践，对持续交付这个话题做个总结。  总结：工具和实践持续交付的核心是构建一个部署流水线，这个流水线起始于源代码，终止于用户界面，并长期地、反复地、持续地运行。我们采用持续交付的目的是，更加频繁地发布软件中最新的改动，增加产品迭代的次数，在适应快节奏需求的同时，保证产品的质量。 对于源代码管理，我在项目中经常使用Git，">
+<meta name="twitter:image" content="http://yoursite.com/2020/01/09/continuous-delivery-part-6/cd.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/01/09/continuous-delivery-part-6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>《持续交付》学习笔记——总结 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/09/continuous-delivery-part-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《持续交付》学习笔记——总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-09 17:38:53" itemprop="dateCreated datePublished" datetime="2020-01-09T17:38:53+08:00">2020-01-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/01/09/continuous-delivery-part-6/" class="post-meta-item leancloud_visitors" data-flag-title="《持续交付》学习笔记——总结" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/01/09/continuous-delivery-part-6/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/01/09/continuous-delivery-part-6/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>本文是《持续交付》一书学习总结的最后一篇。主要内容是结合实际中的一些工具和实践，对持续交付这个话题做个总结。</p>
+<p><img src="/2020/01/09/continuous-delivery-part-6/cd.jpg" alt="持续交付"></p>
+<h2 id="总结：工具和实践"><a href="#总结：工具和实践" class="headerlink" title="总结：工具和实践"></a>总结：工具和实践</h2><p>持续交付的核心是构建一个部署流水线，这个流水线起始于源代码，终止于用户界面，并长期地、反复地、持续地运行。我们采用持续交付的目的是，更加频繁地发布软件中最新的改动，增加产品迭代的次数，在适应快节奏需求的同时，保证产品的质量。</p>
+<p>对于源代码管理，我在项目中经常使用<strong>Git</strong>，这也目前比较主流的版本控制工具和系统。开源社区Github的代码管理也是Git来完成。很多商业公司提供了图形界面化的代码管理工具，比如<strong>Bitbucket</strong>以及<strong>Gitlab</strong>，当然这些图形化工具的背后依然是Git命令实现的。</p>
+<p>在持续集成阶段，可以使用一些开源的持续集成系统如<strong>Jenkins</strong>，它的好处是应用广泛、开源免费、插件丰富。还有一些商用的CI系统，比如<strong>TeamCity</strong>等，它的好处是相对较少，不过要收费。具体的build工具就依赖项目了，比如.NET项目就可以使用MSBuild，Java项目可以使用Maven，Gradle等，JavaScript项目可以使用NodeJS及其相关的库。这些build工具都可以直接或者通过插件的方式配置在CI系统中，用于实现部署流水线。</p>
+<p>对于测试，也是因项目而异。常见的单元测试工具如NUnit，JUnit，Karma等。测试工具也可以与CI系统结合，或者写入部署流水线的脚本中。还有很多单元测试与开发框架紧密集成，方便开发者使用。至于测试的代码覆盖率、安全问题以及代码风格问题可以通过静态代码扫描工具发现，常见的工具有<strong>SonarQube</strong>，我们可以将其配置在CI系统中，在每次build时运行，并把结果上传到服务器供查看。如果有比较严重的问题，可以直接让build失败，直到问题解决。</p>
+<p>在build成功后，要把生成的一些可部署的二进制文件或者容器上传到某个仓库中，常见的仓库有<strong>JFrog Artifactory</strong>。该工具还支持二进制文件的安全扫描XRay功能。这类工具也可以通过插件集成到如Jenkins这样的CI系统中。在build过程中有时还需要把要执行的命令和环境打包成一个容器用于部署，常见的容器工具有<strong>Docker</strong>，使用的十分广泛。生成的Docker镜像也可以上传到远程的仓库中。</p>
+<p>对于CI系统执行的脚本，可以利用系统支持的语言和API，比如Jenkins里基于<strong>Groovy</strong>脚本的Jenkins API。如果有常见的功能，可以将其配置成Module，供其他开发者使用，提供团队整体的开发效率。</p>
+<p>在部署阶段，由于我经常参与跟云平台相关的项目，常见的平台工具有微软的<strong>Azure</strong>，亚马逊的<strong>AWS</strong>，Google的<strong>Google Cloud</strong>。不过这些平台都从基础设施开始就可以支持，比较底层。对于容器类的应用有<strong>Kubernetes（K8S）</strong>作为容器的管理工具，开发人员不必关心Docker容器的资源管理细节，而可以专注于容器的使用。对于发布流程，可以使用诸如<strong>Spinnaker</strong>的工具来管理，它支持蓝绿发布、金丝雀发布、手工触发等多种发布流程的管理。管理员只需要在界面上进行简单的配置和控制，就可以完成产品的部署和发布。这个工具支持的部署平台包括前面提到的Azure、AWS以及K8S等。</p>
+<p>最后几点体会就是，工具再好用也要服从于好的实践流程，并且整个团队都要对高效的流程有纪律之心，不能觉得可有可无。没有一劳永逸的流程和工具，二者都在频繁改进中，就像软件在不断迭代一样。软件持续交付是整个团队的事情，某个环节的低效都可能成为整个流程的瓶颈。</p>
+<p>《持续交付》这本书的分享就到这里，谢谢！欢迎讨论。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/持续交付/" rel="tag"># 持续交付</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/01/06/continuous-delivery-part-5/" rel="next" title="《持续交付》学习笔记（五）">
+                  <i class="fa fa-chevron-left"></i> 《持续交付》学习笔记（五）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/01/10/angular-bootstrap-process/" rel="prev" title="日拱一卒系列（一）—— Angular启动过程简析">
+                  日拱一卒系列（一）—— Angular启动过程简析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结：工具和实践"><span class="nav-number">2.</span> <span class="nav-text">总结：工具和实践</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

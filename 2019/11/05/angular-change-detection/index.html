@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="标题：Angular Service 变更检测探究 作者：jtzcode 上次更新：2019年11月05日  引言使用过现代JavaScript框架的开发者，都应该熟悉绑定（binding）的概念。绑定通常有两个方向。一是由用户交互驱动，在浏览器的页面上发生了输入、点击操作，导致应用程序的状态发生改变，这些改变需要反映到程序中特定变量上。另一个方向是，JavaScript代码的业务逻辑中改变了程序">
+<meta name="keywords" content="Tech,Web Front-end,Angular">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Angular 变更检测探究">
+<meta property="og:url" content="http://yoursite.com/2019/11/05/angular-change-detection/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="标题：Angular Service 变更检测探究 作者：jtzcode 上次更新：2019年11月05日  引言使用过现代JavaScript框架的开发者，都应该熟悉绑定（binding）的概念。绑定通常有两个方向。一是由用户交互驱动，在浏览器的页面上发生了输入、点击操作，导致应用程序的状态发生改变，这些改变需要反映到程序中特定变量上。另一个方向是，JavaScript代码的业务逻辑中改变了程序">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/11/05/angular-change-detection/change-detector.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/11/05/angular-change-detection/default-detection.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/11/05/angular-change-detection/change-detection.png">
+<meta property="og:updated_time" content="2020-11-10T02:32:41.943Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Angular 变更检测探究">
+<meta name="twitter:description" content="标题：Angular Service 变更检测探究 作者：jtzcode 上次更新：2019年11月05日  引言使用过现代JavaScript框架的开发者，都应该熟悉绑定（binding）的概念。绑定通常有两个方向。一是由用户交互驱动，在浏览器的页面上发生了输入、点击操作，导致应用程序的状态发生改变，这些改变需要反映到程序中特定变量上。另一个方向是，JavaScript代码的业务逻辑中改变了程序">
+<meta name="twitter:image" content="http://yoursite.com/2019/11/05/angular-change-detection/change-detector.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2019/11/05/angular-change-detection/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Angular 变更检测探究 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/11/05/angular-change-detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Angular 变更检测探究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-05 10:26:37" itemprop="dateCreated datePublished" datetime="2019-11-05T10:26:37+08:00">2019-11-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:41" itemprop="dateModified" datetime="2020-11-10T10:32:41+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/11/05/angular-change-detection/" class="post-meta-item leancloud_visitors" data-flag-title="Angular 变更检测探究" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2019/11/05/angular-change-detection/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/11/05/angular-change-detection/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>标题：<u><strong>Angular Service 变更检测探究</strong></u></p>
+<p>作者：<strong>jtzcode</strong></p>
+<p>上次更新：<strong>2019年11月05日</strong></p>
+<hr>
+<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>使用过现代JavaScript框架的开发者，都应该熟悉绑定（binding）的概念。绑定通常有两个方向。一是由用户交互驱动，在浏览器的页面上发生了输入、点击操作，导致应用程序的状态发生改变，这些改变需要反映到程序中特定变量上。另一个方向是，JavaScript代码的业务逻辑中改变了程序的状态，比如通过API请求拿到新的数据，而这些状态也需要反映的页面的控件上。很多框架如AngularJS就实现了双向绑定机制。</p>
+<p>下面我们来看上述第二种绑定，即程序状态从业务代码到前端页面的传递过程。如果沃恩自己去实现应该怎么做呢？最直观的想法是：在恰当的时候对程序中的变量表达式进行求值，看看它是否与原来的值相同。如果不同，则把新的值写入与页面渲染相关的对象中。这里面检查变量表达式的值是否变化的过程就是所谓的变更检测（change detection）。Angular就是采用变更检测实现绑定的。下面我们具体来看。</p>
+<h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><p>程序状态变化的来源有以下几种，首先是响应用户在UI上的操作，比如用户点击了一个按钮，改变了某个变量的值。然后是浏览器的异步事件，比如<code>setTimeout</code>的回调函数，改变了某个变量。最后是应用程序中的异步事件，比如API返回的Promise或者Observable对象在Resolve时，改变了变量的值。那么Angular是如何知道这些状态的改变呢？</p>
+<a id="more"></a>
+<p>我们知道，Angular的组件可以依赖其他的组件来构建应用程序的页面逻辑，最后形成一棵组件树。每个组件都有自己的变更检测器（change detector）。因此，变更检测器的结构也是一棵同构的树（见下图）。</p>
+<p><img src="/2019/11/05/angular-change-detection/change-detector.jpg" alt="变更检测器树"></p>
+<p>当某个组件的状态发生改变时，Angular会从这棵树的根节点开始遍历，出发所有组件节点的变更检测器，这样Angular就知道那些组件的状态发生了改变，需要更新相应的UI（见下图）。这个过程看似开销很大，但Angular已经进行了大量优化，实际变更检测的速度很快。</p>
+<p><img src="/2019/11/05/angular-change-detection/default-detection.jpg" alt="默认变更检测策略"></p>
+<p>上述变更检测的策略是Angular的默认行为。事实上，我们可以通过<code>ChangeDetectionStrategy</code>对象来配置某个组件的变更检测策略。如果不指定，该对象的值是<code>Default</code>。在默认情况下，某个组件的变更检测触发，受其他组件的影响。那么如何让组件只关注自己的内部的变化呢？答案是设置<code>ChangeDetectionStrategy</code>的值为<code>OnPush</code>。</p>
+<h3 id="OnPush策略"><a href="#OnPush策略" class="headerlink" title="OnPush策略"></a>OnPush策略</h3><p>在OnPush策略下，只有两种情况可以触发当前组件的变更检测：</p>
+<ul>
+<li>组件的输入属性（绑定）的引用被改变</li>
+<li>组件内部触发了异步事件</li>
+</ul>
+<p>我们先来看第一点，这里关键词是<strong>引用</strong>。比如下面这个组件：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">    &lt;test [config]="config"&gt;&lt;/test&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> AppComponent  &#123;</span><br><span class="line">  config = &#123;</span><br><span class="line">    name: <span class="string">'jtz'</span></span><br><span class="line">  &#125;;</span><br><span class="line">  onClick() &#123;</span><br><span class="line">    <span class="keyword">this</span>.config.name = <span class="string">'code'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在<code>AppComponent</code>中定义了<code>config</code>对象，并把它作为<code>&lt;test&gt;</code>组件的输入属性。<code>&lt;test&gt;</code>组件的变更检测策略定义为<code>OnPush</code>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'test'</span>,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">    &lt;h1&gt;&#123;&#123;config.name&#125;&#125;&lt;/h1&gt;</span></span><br><span class="line"><span class="string">    &#123;&#123;changeDetect&#125;&#125;</span></span><br><span class="line"><span class="string">  `</span>,</span><br><span class="line">  changeDetection: ChangeDetectionStrategy.OnPush</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> TestComponent  &#123;</span><br><span class="line">  <span class="meta">@Input</span>() config;</span><br><span class="line">  <span class="keyword">get</span> changeDetect() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'Changed'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>AppComponent</code>中我们通过响应单击事件改变了<code>config</code>对象中字段的值，虽然config对象作为<code>TestComponent</code>的输入，但是实际执行就会发现，<code>changeDetect</code>方法并没有重新执行。原因就在于，我们在<code>AppComponent</code>中<strong>改变的只是<code>config</code>对象<code>name</code>字段的值，而没有改变<code>config</code>本身的引用</strong>。因此，如果想让变更检测触发，需要将<code>onClick</code>方法的实现改为：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.config = &#123; name: <span class="string">'code'</span> &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>即对<code>config</code>对象重新赋值，刷新引用。<br>下面来看在OnPush策略下触发变更检测的第二个因素：<strong>组件内部的异步事件</strong>。这里需要注意的是，这个异步事件特指页面的DOM事件，不包括定时器事件和AJAX请求返回等异步事件，对于后者Angular是无法直接获知事件的发生的。比如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">    template: <span class="string">`&lt;span&gt;&#123;&#123;count&#125;&#125;&lt;/span&gt;`</span>,</span><br><span class="line">    changeDetection: ChangeDetectionStrategy.OnPush</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">export</span> <span class="keyword">class</span> TestComponent &#123;</span><br><span class="line">    count = <span class="number">0</span>;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">      setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">this</span>.count = <span class="number">1</span>, <span class="number">100</span>);</span><br><span class="line">      <span class="keyword">this</span>.http.get(<span class="string">'https://jtzcode.io'</span>).subscribe(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.count = data.count;</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面组件中，构造器中的异步事件触发后，更新了<code>count</code>的值，但这个更新不会反映到UI上，因为Angular并不知道异步事件的触发，因此没有触发变更检测。如果在组件UI上加一个按钮，单击按钮来更新<code>count</code>的值，就可以看到UI的改变。</p>
+<p>OnPush策略除了可以减少不必要的变更检测从而提高性能，还可以方便开发者在特定的时刻触发变更检测，满足逻辑上的灵活性需求。比如，一个API请求返回一个Observable对象，我们需要利用该对象的数据流，在特定的时候更新组件的状态，这时我们可以通过Angular提供的接口来实现，比如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, OnInit &#125; <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Observable &#125; <span class="keyword">from</span> <span class="string">'rxjs'</span>;</span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'change-detect-observable'</span>,</span><br><span class="line">  changeDetection: ChangeDetectionStrategy.OnPush,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">        &lt;div&gt;</span></span><br><span class="line"><span class="string">            &lt;div&gt;Total items: &#123;&#123;counter&#125;&#125;&lt;/div&gt;</span></span><br><span class="line"><span class="string">            &lt;button (click)="refresh()"&gt;Refresh&lt;/button&gt;</span></span><br><span class="line"><span class="string">        &lt;/div&gt;</span></span><br><span class="line"><span class="string">    `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> ChangeDetectionComponent <span class="keyword">implements</span> OnInit &#123;</span><br><span class="line">  title = <span class="string">'change-detect-observable'</span>;</span><br><span class="line">  <span class="meta">@Input</span>() items: Observable&lt;<span class="built_in">number</span>&gt;;</span><br><span class="line">  counter = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">constructor</span>(<span class="params"><span class="keyword">private</span> changeDetector: ChangeDetectorRef</span>) &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  refresh() &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">"Refresh counter."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ngOnInit() &#123;</span><br><span class="line">    <span class="keyword">this</span>.items.subscribe(<span class="function">(<span class="params">v</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.counter++;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.counter % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.changeDetector.markForCheck();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, <span class="literal">null</span>, <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.changeDetector.markForCheck();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面代码中，我们定义了一个名为<code>items</code>的Observable数据流对象，并在组件初始化时订阅了这个数据流。当数据流里产生了新的数据时，我们增加了计数器。注意，这里的<code>items</code>对象虽然是作为输入绑定，但在数据产生时，我们只是拿数据进行处理，对<code>items</code>对象本身没有操作，因此不会触发当前组件的变更检测，这符合我们的预期。</p>
+<p>在这里，我们想在拿到的数字是偶数时，触发变更检测。为此，我们注入了一个类型为<code>ChangeDetectorRef</code>的Service，并调用了该Service的<code>markForCheck</code>方法。这个方法会手动触发当前组件的变更检测。从这个例子我们就能看到OnPush策略的灵活性。</p>
+<h3 id="生命周期钩子"><a href="#生命周期钩子" class="headerlink" title="生命周期钩子"></a>生命周期钩子</h3><p>有时候，我们需要监控绑定属性的变化，这时就可以使用组件的生命周期钩子（hook）函数<code>ngOnChanges</code>以及<code>ngDoCheck</code>。</p>
+<p>OnChanges钩子会在组件的一个或多个绑定属性被改变后调用，我们可以在对应的<code>ngOnChanges</code>方法中拿到变化的属性，以及该属性的原值和新值，进而做相应处理。使用该钩子函数，需要让组件实现<code>OnChanges</code>接口。</p>
+<p>DoCheck钩子函数会更细致一些，它可以利用Angular提供的差分器（differ）判断某个属性的改变是什么类型的，以进行相应操作。比如当属性是一个列表时，差分器可以判断该列表的变化是新增了一项，还是删除了一项。使用该钩子，需要让组件实现<code>DoCheck</code>接口。注意，如果你同时实现了DoCheck和OnChanges接口，那么DoCheck的实现会覆盖OnChanges的实现。</p>
+<p>我们可以更深入一些来看看这些钩子函数是如何被调用的。先看下面这张图：</p>
+<p><img src="/2019/11/05/angular-change-detection/change-detection.png" alt="变更检测过程"></p>
+<p>上图说明的是，在父组件中更新子组件的绑定属性时，Angular做的事情。还以前面介绍OnPush策略时的代码为例，父组件为AppComponent，子组件为TestComponent，在子组件有一个输入属性为<code>config</code>，该属性的值在父组件中由<code>config</code>字段传入。</p>
+<p>当父组件的<code>config</code>发生改变并触发变更检测时，首先父组件更新子组件的绑定，即子组件中的<code>config</code>值。然后执行<strong>子组件</strong>的一系列生命周期钩子函数，比如ngOnInit，ngOnChanges等。注意，这一步还没有执行<strong>子组件</strong>的变更检测。接下来是父组件的DOM树重新渲染。渲染结束后，才执行组件的变更检测，这时就会发现子组件<code>config</code>属性的变化，且这个变更检测过程与父组件类似，是个<strong>递归</strong>过程。最后还会执行一些子组件的其他生命周期函数，如AfterViewInit等。这里要注意的是，子组件的重新渲染是在它自己的变更检测流程中进行的，图中没有显示，这说明OnChange等生命周期在渲染前就执行了。</p>
+<p>以上就是关于Angular变更检测的介绍，欢迎讨论。</p>
+<hr>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li>Angular权威教程</li>
+<li><a href="https://blog.angularindepth.com/everything-you-need-to-know-about-change-detection-in-angular-8006c51d206f" target="_blank" rel="noopener">https://blog.angularindepth.com/everything-you-need-to-know-about-change-detection-in-angular-8006c51d206f</a></li>
+<li><a href="https://netbasal.com/a-comprehensive-guide-to-angular-onpush-change-detection-strategy-5bac493074a4" target="_blank" rel="noopener">https://netbasal.com/a-comprehensive-guide-to-angular-onpush-change-detection-strategy-5bac493074a4</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Web-Front-end/" rel="tag"># Web Front-end</a>
+              <a href="/tags/Angular/" rel="tag"># Angular</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/10/15/angular-singleton-services/" rel="next" title="Angular Service 单例问题探究">
+                  <i class="fa fa-chevron-left"></i> Angular Service 单例问题探究
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/12/31/continuous-delivery-part-1/" rel="prev" title="《持续交付》学习笔记（一）">
+                  《持续交付》学习笔记（一） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本原理"><span class="nav-number">2.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OnPush策略"><span class="nav-number">3.</span> <span class="nav-text">OnPush策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生命周期钩子"><span class="nav-number">4.</span> <span class="nav-text">生命周期钩子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

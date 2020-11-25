@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="今天分享一下用Flask框架实现一套简易的Python API Service。Flask是一个轻量级的Web框架，它有一个较小的核心库，并具备良好的扩展性。相比于Django，这个框架更适合初学者上手，也更像python的编程风格。 本文通过实现一个获取书签的简单功能，学习如何使用Flask实现API的设计。如果想要深入学习FLASK框架，建议参考官方文档以及其他网络教程。 启动服务器我们先来搭">
+<meta name="keywords" content="Tech,Python,Flask">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python Web API 入门 —— Flask实现">
+<meta property="og:url" content="http://yoursite.com/2020/09/28/python-flask-api/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="今天分享一下用Flask框架实现一套简易的Python API Service。Flask是一个轻量级的Web框架，它有一个较小的核心库，并具备良好的扩展性。相比于Django，这个框架更适合初学者上手，也更像python的编程风格。 本文通过实现一个获取书签的简单功能，学习如何使用Flask实现API的设计。如果想要深入学习FLASK框架，建议参考官方文档以及其他网络教程。 启动服务器我们先来搭">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.201Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python Web API 入门 —— Flask实现">
+<meta name="twitter:description" content="今天分享一下用Flask框架实现一套简易的Python API Service。Flask是一个轻量级的Web框架，它有一个较小的核心库，并具备良好的扩展性。相比于Django，这个框架更适合初学者上手，也更像python的编程风格。 本文通过实现一个获取书签的简单功能，学习如何使用Flask实现API的设计。如果想要深入学习FLASK框架，建议参考官方文档以及其他网络教程。 启动服务器我们先来搭">
+
+<link rel="canonical" href="http://yoursite.com/2020/09/28/python-flask-api/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Python Web API 入门 —— Flask实现 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/28/python-flask-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python Web API 入门 —— Flask实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-28 20:51:24" itemprop="dateCreated datePublished" datetime="2020-09-28T20:51:24+08:00">2020-09-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/28/python-flask-api/" class="post-meta-item leancloud_visitors" data-flag-title="Python Web API 入门 —— Flask实现" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/09/28/python-flask-api/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/28/python-flask-api/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>今天分享一下用Flask框架实现一套简易的Python API Service。Flask是一个轻量级的Web框架，它有一个较小的核心库，并具备良好的<a href="https://flask.palletsprojects.com/en/1.1.x/design/" target="_blank" rel="noopener">扩展性</a>。相比于<a href="https://www.djangoproject.com/" target="_blank" rel="noopener">Django</a>，这个框架更适合初学者上手，也更像python的编程风格。</p>
+<p>本文通过实现一个获取书签的简单功能，学习如何使用Flask实现API的设计。如果想要深入学习FLASK框架，建议参考官方文档以及其他网络教程。</p>
+<h3 id="启动服务器"><a href="#启动服务器" class="headerlink" title="启动服务器"></a>启动服务器</h3><p>我们先来搭建一个简易的HTTP Server，用于host这个API服务：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> flask</span><br><span class="line">app = flask.Flask(__name__)</span><br><span class="line">app.config[<span class="string">"DEBUG"</span>] = <span class="literal">True</span></span><br><span class="line">app.run()</span><br></pre></td></tr></table></figure>
+
+<p>启动一个Server的过程很简单，只需导入flask库，然后实例化一个app对象，并调用<code>run</code>方法。运行后，该Server会默认监听<code>5000</code>端口，可以通过localhost来访问和测试。</p>
+<a id="more"></a>
+<h3 id="简单请求"><a href="#简单请求" class="headerlink" title="简单请求"></a>简单请求</h3><p>在没有连接数据库前，我们先用测试数据构建一个简单的GET请求：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> request, jsonify</span><br><span class="line"><span class="meta">@app.route('/', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">home</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"&lt;h1&gt;Hello Flask&lt;/h1&gt;&lt;p&gt;This is an API prototype in Python.&lt;/p&gt;"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/api/v1/bookmarks/all', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getAllBookmarks</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> jsonify(bookmarks)</span><br></pre></td></tr></table></figure>
+
+<p>其中，bookmarks数据来自定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bookmarks = [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">'id'</span>: <span class="string">'0'</span>,</span><br><span class="line">        <span class="string">'name'</span>: <span class="string">'python'</span>,</span><br><span class="line">        <span class="string">'children'</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">'id'</span>: <span class="string">'00'</span>,</span><br><span class="line">                <span class="string">'name'</span>: <span class="string">'python offical'</span>,</span><br><span class="line">                <span class="string">'link'</span>: <span class="string">'https://www.python.org/'</span></span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">'id'</span>: <span class="string">'01'</span>,</span><br><span class="line">                <span class="string">'name'</span>: <span class="string">'python webapi'</span>,</span><br><span class="line">                <span class="string">'link'</span>: <span class="string">'https://programminghistorian.org/en/lessons/creating-apis-with-python-and-flask'</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">'id'</span>: <span class="string">'1'</span>,</span><br><span class="line">        <span class="string">'name'</span>: <span class="string">'python org'</span>,</span><br><span class="line">        <span class="string">'link'</span>: <span class="string">'https://www.python.org/'</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，我们通过<strong>装饰器方法</strong>（decorator）<code>route</code>来定义API的路由，根路由由home方法处理，获取所有书签的路由则由<code>getAllBookmarks</code>方法处理。我们还通过导入<code>jsonify</code>函数来将python列表转为标准的JSON格式。</p>
+<h3 id="参数化请求"><a href="#参数化请求" class="headerlink" title="参数化请求"></a>参数化请求</h3><p>一个常见的需求是，我们要通过一个参数来返回相应的数据，比如通过id来查找bookmark：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> util</span><br><span class="line"><span class="meta">@app.route('/api/v1/bookmarks', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getBookmarkById</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'id'</span> <span class="keyword">in</span> request.args:</span><br><span class="line">        id = request.args[<span class="string">'id'</span>]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Error: No ID field is specified."</span></span><br><span class="line"></span><br><span class="line">    results = []</span><br><span class="line">    linkResults = []</span><br><span class="line">    utils.flattenBookmarks(bookmarks, linkResults)</span><br><span class="line">    print(<span class="string">f"Flatten results: <span class="subst">&#123;len(linkResults)&#125;</span>"</span>)</span><br><span class="line">    <span class="keyword">for</span> link <span class="keyword">in</span> linkResults:</span><br><span class="line">        <span class="keyword">if</span> link[<span class="string">'id'</span>] == id:</span><br><span class="line">            results.append(link)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> jsonify(results)</span><br></pre></td></tr></table></figure>
+
+<p>这里，我们通过request.args字段来获取URL中的查询字符串，并从中解析出参数。<code>args</code>是个字典，解析的方式很直接。这段程序还引用了<code>util</code>模块，目的是调用<code>flattenBookmarks</code>方法将书签数据结构摊平，因为书签栏中书签可能是由层次结构的。该模块方法与API实现无关，可参考<a href="https://github.com/jtzcode/flask-in-action/blob/master/utils.py" target="_blank" rel="noopener">这里</a>。</p>
+<h3 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h3><p>下面我们以<code>sqlite</code>数据库为例，学习FLASK API如何通过连接数据库返回数据:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlite3</span><br><span class="line"><span class="meta">@app.route('/api/v1/bookmarks/all', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getAllBooks</span><span class="params">()</span>:</span> </span><br><span class="line">    conn = sqlite3.connect(<span class="string">'flask-in-action/books.db'</span>)</span><br><span class="line">    conn.row_factory = dict_facotry</span><br><span class="line">    cur = conn.cursor()</span><br><span class="line">    allBookmarks = cur.execute(<span class="string">'SELECT * FROM books;'</span>).fetchall()</span><br><span class="line">    <span class="keyword">return</span> jsonify(allBookmarks)</span><br></pre></td></tr></table></figure>
+
+<p>首先要导入<code>sqlite3</code>模块，然后通过<code>connect</code>方法连接数据库，并在参数中指定数据库文件的路径。如果是在本地调试，要注意.db文件的路径，虽然它与api定义的的python文件在同一级，但在<strong>server上却要通过完整的路径</strong>找到，即父目录<code>flask-in-action/</code>不能省略。</p>
+<p>为了获取查询结果，需要给<code>connection</code>对象指定一个<code>row_factory</code>方法，该方法被<code>connection</code>内部调用，决定了如何读取每一行的数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dict_facotry</span><span class="params">(cursor, row)</span>:</span></span><br><span class="line">    d = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> idx, col <span class="keyword">in</span> enumerate(cursor.description):</span><br><span class="line">        d[col[<span class="number">0</span>]] = row[idx]</span><br><span class="line">    <span class="keyword">return</span> d</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，最终的查询是通过<code>cursor</code>对象完成的。关于sqlite3模块，可以参考其<a href="https://docs.python.org/2/library/sqlite3.html" target="_blank" rel="noopener">官网</a>获取详细的用法。</p>
+<h3 id="条件查询"><a href="#条件查询" class="headerlink" title="条件查询"></a>条件查询</h3><p>类似地，如果需要根据参数查询结果，可以Filter：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/api/v1/books', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getBookByFilter</span><span class="params">()</span>:</span></span><br><span class="line">    queryStrings = request.args</span><br><span class="line">    id = queryStrings.get(<span class="string">'id'</span>)</span><br><span class="line">    published = queryStrings.get(<span class="string">'published'</span>)</span><br><span class="line">    author = queryStrings.get(<span class="string">'author'</span>)</span><br><span class="line"></span><br><span class="line">    query = <span class="string">'SELECT * FROM books WHERE'</span></span><br><span class="line">    toFilter = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> id:</span><br><span class="line">        query += <span class="string">' id=? AND'</span></span><br><span class="line">        toFilter.append(id)</span><br><span class="line">    <span class="keyword">if</span> published:</span><br><span class="line">        query += <span class="string">' published=? AND'</span></span><br><span class="line">        toFilter.append(published)</span><br><span class="line">    <span class="keyword">if</span> author:</span><br><span class="line">        query += <span class="string">' author=? AND'</span></span><br><span class="line">        toFilter.append(author)</span><br><span class="line"></span><br><span class="line">    query = query[:<span class="number">-4</span>] + <span class="string">';'</span></span><br><span class="line"></span><br><span class="line">    conn = sqlite3.connect(<span class="string">'flask-in-action/books.db'</span>)</span><br><span class="line">    conn.row_factory = dict_facotry</span><br><span class="line">    cur = conn.cursor()</span><br><span class="line"></span><br><span class="line">    results = cur.execute(query, toFilter).fetchall()</span><br><span class="line">    <span class="keyword">return</span> jsonify(results)</span><br></pre></td></tr></table></figure>
+
+<p>这次的查询语句使用<code>WHERE</code>关键字添加了条件，并把可能的条件放到一个列表<code>toFilter</code>中，并一起传递给<code>execute</code>方法。</p>
+<h3 id="POST请求"><a href="#POST请求" class="headerlink" title="POST请求"></a>POST请求</h3><p>以上的例子都是GET请求，如果是POST请求，可以参考官网的一个用户登录的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/login', methods=['POST', 'GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">login</span><span class="params">()</span>:</span></span><br><span class="line">    error = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:</span><br><span class="line">        <span class="keyword">if</span> valid_login(request.form[<span class="string">'username'</span>],</span><br><span class="line">                       request.form[<span class="string">'password'</span>]):</span><br><span class="line">            <span class="keyword">return</span> log_the_user_in(request.form[<span class="string">'username'</span>])</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            error = <span class="string">'Invalid username/password'</span></span><br><span class="line">    <span class="comment"># the code below is executed if the request method</span></span><br><span class="line">    <span class="comment"># was GET or the credentials were invalid</span></span><br><span class="line">    <span class="keyword">return</span> render_template(<span class="string">'login.html'</span>, error=error)</span><br></pre></td></tr></table></figure>
+
+<p>POST请求的表单数据可以通过<code>request.form</code>对象获得，对表单数据处理后可以渲染相应的页面。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://www.fullstackpython.com/flask.html" target="_blank" rel="noopener">https://www.fullstackpython.com/flask.html</a></li>
+<li><a href="https://flask.palletsprojects.com/en/1.1.x/" target="_blank" rel="noopener">https://flask.palletsprojects.com/en/1.1.x/</a></li>
+<li><a href="https://programminghistorian.org/en/lessons/creating-apis-with-python-and-flask" target="_blank" rel="noopener">https://programminghistorian.org/en/lessons/creating-apis-with-python-and-flask</a></li>
+<li><a href="https://docs.python.org/2/library/sqlite3.html" target="_blank" rel="noopener">https://docs.python.org/2/library/sqlite3.html</a></li>
+<li><a href="https://flask.palletsprojects.com/en/1.1.x/quickstart/" target="_blank" rel="noopener">https://flask.palletsprojects.com/en/1.1.x/quickstart/</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/Flask/" rel="tag"># Flask</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/09/27/sushi-2/" rel="next" title="苏轼和他背后的时代（下）">
+                  <i class="fa fa-chevron-left"></i> 苏轼和他背后的时代（下）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/09/28/python-sequence-slice/" rel="prev" title="Python 序列之切片（slice）">
+                  Python 序列之切片（slice） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动服务器"><span class="nav-number">1.</span> <span class="nav-text">启动服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单请求"><span class="nav-number">2.</span> <span class="nav-text">简单请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数化请求"><span class="nav-number">3.</span> <span class="nav-text">参数化请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接数据库"><span class="nav-number">4.</span> <span class="nav-text">连接数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#条件查询"><span class="nav-number">5.</span> <span class="nav-text">条件查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#POST请求"><span class="nav-number">6.</span> <span class="nav-text">POST请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

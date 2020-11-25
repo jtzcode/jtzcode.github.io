@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言今天看了两篇关于React组件重用的文章，作者给出了一些小技巧，方便我们更好地考虑组件重用的设计。现在分享在这里。 重用的思路我们通常意义理解的可重用，一般是指能适配多种用户常见，可以被其他用户使用，满足他们的需求。但是基于这种理解实现的可重用组件会有一个问题：忙于扩展功能以适应新需求，导致组件的实现越来越复杂，bug也可能越来越多。 例如，如果想适配更多的用户需求，我们最直接的做法是增加属">
+<meta name="keywords" content="Tech,Web Front-end,日拱一卒,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="日拱一卒系列（四）—— React 组件重用探究">
+<meta property="og:url" content="http://yoursite.com/2020/03/05/react-reusability/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言今天看了两篇关于React组件重用的文章，作者给出了一些小技巧，方便我们更好地考虑组件重用的设计。现在分享在这里。 重用的思路我们通常意义理解的可重用，一般是指能适配多种用户常见，可以被其他用户使用，满足他们的需求。但是基于这种理解实现的可重用组件会有一个问题：忙于扩展功能以适应新需求，导致组件的实现越来越复杂，bug也可能越来越多。 例如，如果想适配更多的用户需求，我们最直接的做法是增加属">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2020/03/05/react-reusability/abstract.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.202Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日拱一卒系列（四）—— React 组件重用探究">
+<meta name="twitter:description" content="引言今天看了两篇关于React组件重用的文章，作者给出了一些小技巧，方便我们更好地考虑组件重用的设计。现在分享在这里。 重用的思路我们通常意义理解的可重用，一般是指能适配多种用户常见，可以被其他用户使用，满足他们的需求。但是基于这种理解实现的可重用组件会有一个问题：忙于扩展功能以适应新需求，导致组件的实现越来越复杂，bug也可能越来越多。 例如，如果想适配更多的用户需求，我们最直接的做法是增加属">
+<meta name="twitter:image" content="http://yoursite.com/2020/03/05/react-reusability/abstract.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/05/react-reusability/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>日拱一卒系列（四）—— React 组件重用探究 | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/05/react-reusability/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          日拱一卒系列（四）—— React 组件重用探究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-05 15:43:21" itemprop="dateCreated datePublished" datetime="2020-03-05T15:43:21+08:00">2020-03-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/03/05/react-reusability/" class="post-meta-item leancloud_visitors" data-flag-title="日拱一卒系列（四）—— React 组件重用探究" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2020/03/05/react-reusability/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/05/react-reusability/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/2020/03/05/react-reusability/abstract.jpg" alt="head"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>今天看了两篇关于React组件重用的文章，作者给出了一些小技巧，方便我们更好地考虑组件重用的设计。现在分享在这里。</p>
+<h2 id="重用的思路"><a href="#重用的思路" class="headerlink" title="重用的思路"></a>重用的思路</h2><p>我们通常意义理解的可重用，一般是指能适配多种用户常见，可以被其他用户使用，满足他们的需求。但是基于这种理解实现的可重用组件会有一个问题：<strong>忙于扩展功能以适应新需求，导致组件的实现越来越复杂，bug也可能越来越多</strong>。</p>
+<p>例如，如果想适配更多的用户需求，我们最直接的做法是增加属性的数量，即定义新的props元素：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;ReusableComponent name=&#123;<span class="keyword">this</span>.state.name&#125; description=&#123;description&#125; /&gt;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+<p>当我们要加一个新的属性<code>status</code>时，就需要改写props数组，添加处理逻辑，然后在使用时传入新的属性。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;ReusableComponent name=&#123;<span class="keyword">this</span>.state.name&#125; description=&#123;description&#125; status=<span class="string">"initialized"</span> /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>随着时间推移，这个属性列表会越来越长，组件内部的处理逻辑会越来越复杂。我们可以想想为什么会出现这种情况。一方面我们有重用并扩展组件的需求，而同时我们也需要每个属性有明确的功能。为每个新功能增加一个属性，牺牲了设计的简洁性，但功能一目了然。我们不太可能同时要求可扩展、设计简单又易用。因此，我们可以牺牲一些易用性，来提高扩展的方便性，比如：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;ReusableComponent values=&#123;<span class="keyword">this</span>.state.values&#125; handlers=&#123;handlers&#125; /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以把组件的属性值和处理函数抽象出来，分别放到一个数组中，这样既满足了扩展的需求，又不至于增加太多的属性，但是牺牲了可读性和易用性。组件的使用者不能通过属性名就得知该组件的用法。同时，组件的内部实现将更加抽象和复杂，但这是将开发的难度转移到组件设计者而不是让使用者承担。</p>
+<p>我想在真正实现时，还是要做一个权衡：哪些属性是需要直接暴露出来的，哪些可以直接集成在一起，很多组件的设计可能类似这样：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;ReusableComponent name=&#123;<span class="keyword">this</span>.state.title&#125; onChange=&#123;(e) =&gt; <span class="keyword">this</span>.setState()&#125; otherOptions=&#123;<span class="keyword">this</span>.state.options&#125; /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这个组件直接暴露了 <code>name</code> 和 <code>onChange</code> 属性，将其他属性隐藏在 <code>otherOptions</code> 中。</p>
+<h2 id="复杂一点的例子"><a href="#复杂一点的例子" class="headerlink" title="复杂一点的例子"></a>复杂一点的例子</h2><p>下面来看一个稍微复杂一些的例子，在某个组件内部还有子组件。如果这时要扩展父组件，还要考虑新增的属性对子组件的影响。例如：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;TicketList</span><br><span class="line">    price=&#123;prices&#125;</span><br><span class="line">    isRoundtrip</span><br><span class="line">    items=&#123;labels&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个展示机票列表的组件，它的实现类似：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">&#123;condition &amp;&amp; <span class="xml"><span class="tag">&lt;<span class="name">TicketListItem</span> <span class="attr">label</span>=<span class="string">&#123;items[0]&#125;</span> &#123;<span class="attr">..otherProps</span>&#125;/&gt;</span>&#125;</span></span><br><span class="line"><span class="xml">...</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，这里的 <code>TicketListItem</code> 并不是公开的，而是作为组件 <code>TicketList</code> 实现的一部分，外部程序只能使用 <code>TicketList</code> 组件。这种设计就不利用重用，因为 <code>TicketList</code> 的实现依赖于它的子组件，而外部使用者无法直接干预子组件达到修改父组件的目的。更好的做法是将父组件和子组件都设计为公开的接口，这样用户可以灵活使用和组合需要的组件，并且修改其中一个组件不会影响其他组件的使用。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// expose both components to end users</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123;TicketList, TicketListItem&#125; <span class="keyword">from</span> <span class="string">'shared-ui'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// let them compose these themselves</span></span><br><span class="line">&lt;TicketList&gt;</span><br><span class="line">   &lt;TicketListItem </span><br><span class="line">		label=<span class="string">"Trip Fare"</span> </span><br><span class="line">		price=&#123;<span class="number">600</span>&#125;</span><br><span class="line">		&#123;...others&#125; /&gt;</span><br><span class="line">   &lt;TicketListItem </span><br><span class="line">		label=<span class="string">"Seat Upgrade"</span> </span><br><span class="line">		price=&#123;<span class="number">450</span>&#125; /&gt;</span><br><span class="line">&lt;<span class="regexp">/TicketList&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.ohansemmanuel.com/thinking-in-react-isnt-enough/?utm_campaign=React%2BNewsletter&amp;utm_medium=web&amp;utm_source=React_Newsletter_200" target="_blank" rel="noopener">https://www.ohansemmanuel.com/thinking-in-react-isnt-enough/?utm_campaign=React%2BNewsletter&amp;utm_medium=web&amp;utm_source=React_Newsletter_200</a></li>
+<li><a href="https://www.ohansemmanuel.com/props-overload-why-more-props-doesnt-mean-more-reusable/" target="_blank" rel="noopener">https://www.ohansemmanuel.com/props-overload-why-more-props-doesnt-mean-more-reusable/</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Tech/" rel="tag"># Tech</a>
+              <a href="/tags/Web-Front-end/" rel="tag"># Web Front-end</a>
+              <a href="/tags/日拱一卒/" rel="tag"># 日拱一卒</a>
+              <a href="/tags/React/" rel="tag"># React</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/03/04/git-revert-study/" rel="next" title="日拱一卒系列（三）—— Git Revert 探究">
+                  <i class="fa fa-chevron-left"></i> 日拱一卒系列（三）—— Git Revert 探究
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/03/12/angluar-large-list/" rel="prev" title="日拱一卒系列（五）—— Angular 大列表性能优化">
+                  日拱一卒系列（五）—— Angular 大列表性能优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重用的思路"><span class="nav-number">2.</span> <span class="nav-text">重用的思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复杂一点的例子"><span class="nav-number">3.</span> <span class="nav-text">复杂一点的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="两件事，读书，编程" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言最近一段时间阅读了《持续交付》这本书，打算用几篇文章的篇幅总结一下阅读的收获。此为第一篇。我看的是英文原版的，书名是 Continuous Delivery，作者是 Jez Humble，由人民邮电出版社出版。  概念：持续交付软件交付，就是软件从源代码形态到最终形成可交付的软件产品，并发布给用户的过程。那持续交付（Continuous Delivery）是什么意思呢？你可能听过持续集成（CI">
+<meta name="keywords" content="持续交付,DevOps">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《持续交付》学习笔记（一）">
+<meta property="og:url" content="http://yoursite.com/2019/12/31/continuous-delivery-part-1/index.html">
+<meta property="og:site_name" content="两件事，读书，编程">
+<meta property="og:description" content="引言最近一段时间阅读了《持续交付》这本书，打算用几篇文章的篇幅总结一下阅读的收获。此为第一篇。我看的是英文原版的，书名是 Continuous Delivery，作者是 Jez Humble，由人民邮电出版社出版。  概念：持续交付软件交付，就是软件从源代码形态到最终形成可交付的软件产品，并发布给用户的过程。那持续交付（Continuous Delivery）是什么意思呢？你可能听过持续集成（CI">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/12/31/continuous-delivery-part-1/cd.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/12/31/continuous-delivery-part-1/cd-pipeline.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/12/31/continuous-delivery-part-1/feedback.jpg">
+<meta property="og:updated_time" content="2020-11-10T02:32:42.053Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《持续交付》学习笔记（一）">
+<meta name="twitter:description" content="引言最近一段时间阅读了《持续交付》这本书，打算用几篇文章的篇幅总结一下阅读的收获。此为第一篇。我看的是英文原版的，书名是 Continuous Delivery，作者是 Jez Humble，由人民邮电出版社出版。  概念：持续交付软件交付，就是软件从源代码形态到最终形成可交付的软件产品，并发布给用户的过程。那持续交付（Continuous Delivery）是什么意思呢？你可能听过持续集成（CI">
+<meta name="twitter:image" content="http://yoursite.com/2019/12/31/continuous-delivery-part-1/cd.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2019/12/31/continuous-delivery-part-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>《持续交付》学习笔记（一） | 两件事，读书，编程</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">两件事，读书，编程</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/31/continuous-delivery-part-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《持续交付》学习笔记（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-31 10:43:14" itemprop="dateCreated datePublished" datetime="2019-12-31T10:43:14+08:00">2019-12-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/12/31/continuous-delivery-part-1/" class="post-meta-item leancloud_visitors" data-flag-title="《持续交付》学习笔记（一）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">评论：</span>
+    
+    <a title="全部评论" href="/2019/12/31/continuous-delivery-part-1/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/12/31/continuous-delivery-part-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>最近一段时间阅读了《持续交付》这本书，打算用几篇文章的篇幅总结一下阅读的收获。此为第一篇。我看的是英文原版的，书名是 Continuous Delivery，作者是 Jez Humble，由人民邮电出版社出版。</p>
+<p><img src="/2019/12/31/continuous-delivery-part-1/cd.jpg" alt="持续交付"></p>
+<h2 id="概念：持续交付"><a href="#概念：持续交付" class="headerlink" title="概念：持续交付"></a>概念：持续交付</h2><p>软件交付，就是软件从源代码形态到最终形成可交付的软件产品，并发布给用户的过程。那持续交付（Continuous Delivery）是什么意思呢？你可能听过持续集成（CI, Continuous Integration）和持续部署（Continuous Deployment) 等概念，这些概念和流程已经在业界广泛使用。以我的理解，这里的“持续”是<strong>一种结果</strong>，我们为了达到某种目的而“持续”，满足了某些条件的软件交付操作和行为，就是持续交付。那么为了达到什么目的呢？这就是：</p>
+<blockquote>
+<p><strong>以有效的、快速的和可靠的方式交付高质量、有价值的软件产品</strong>。</p>
+</blockquote>
+<p>这是《持续集成》这本书中总结的目标，简单的一句话内涵比较丰富，可以说整本书都是围绕如何达到这个目标而展开。</p>
+<p>那如何到达上述目标呢？只要做好两点：<strong>1. 自动化 2. 频繁发布</strong>。</p>
+<a id="more"></a>
+<p>自动而频繁的交付方式就达到了所谓的“持续”效果。书中使用<strong>部署流水线</strong>（Deployment Pipeline）的概念来形象地描述持续交付的过程。软件就像一个工业零件，在流水线上经过多重步骤的研发、生产、加工、检测，最后作为成熟产品交付给客户。下面是一个部署流水线的例子，有开发经验的同学看起来并不陌生：</p>
+<p><img src="/2019/12/31/continuous-delivery-part-1/cd-pipeline.jpg" alt="部署流水线"></p>
+<p>理解了持续交付的概念，我们来看为什么自动化、频繁地发布就能达到目标呢？这要从软件开发的一些<strong>反模式</strong>（Anti-pattern）行为说起。</p>
+<h2 id="为什么要采用持续交付？"><a href="#为什么要采用持续交付？" class="headerlink" title="为什么要采用持续交付？"></a>为什么要采用持续交付？</h2><p>想要弄清这个问题，我们先来看几个软件发布过程中的反模式（Anti-pattern）。<br><strong>1、手动部署软件</strong>。现代软件系统和应用已经变得越来越复杂，部署过程涉及的技术和操作的细节也是很繁琐，即使是受过专业训练和资深的运维工程师（DevOps、SRE等）也难免犯错。<br><strong>2、直到所有开发工作结束才开始部署类生产（Production-like）环境</strong>。通常在软件企业内部，类生产环境，如staging和production环境，是由运维团队（DevOps）或者(SRE, Site Reliability Engineer）团队完成，而如果这些团队直到开发工作接近尾声才第一次拿到可部署的软件版本，部署过程就很容易出问题。比如，拿到的配置在开发者那里是没问题的，但是不适用于部署类生产环境。还有一个问题是，在类生产环境通常还会发现一些bug，如果这些环境的部署很晚才进行，一些很严重的bug可能很晚才被发现，因而影响产品发布。<br><strong>3、对生产环境进行手动配置</strong>。一旦生产环境的配置需要改变，比如线程池的大小、依赖库的版本等，运维人员直接去修改生产环境的配置文件或者数据库记录。这可能导致生产集群中的服务器有意无意地采用了不同的配置，而且修改的记录也不好追溯。当出现问题时，想回退到某个版本的配置也十分不便。</p>
+<p>针对上述反模式的实践，我们来看自动化（automation）和频繁发布（frequent release）如何解决问题。</p>
+<ul>
+<li><p><strong>自动化</strong>：如果构建（build）、部署（deploy）、测试（test）和发布（release）过程全部自动化，那么这个过程就是可重复的。这就意味着每次交付的做法都是一致的，经过多次验证的，且不会引入人为失误。这也是频繁发布的基础。</p>
+</li>
+<li><p><strong>频繁发布</strong>：如果频繁发布产品，那么每次发布产品特性的增量就是很小的，这就降低了风险。如果发现了问题，也可以快速及时回退。同时，频繁的发布新版本，也能及时得到反馈（feedback）。依据反馈，我们可以尽快发现整个软件交付流程中的问题。</p>
+</li>
+</ul>
+<p>附图有一个反馈的例子，你可以看到，在部署流水线上每一步都有反馈跟上，以此推动整个团队的行动。</p>
+<p><img src="/2019/12/31/continuous-delivery-part-1/feedback.jpg" alt="反馈"></p>
+<p>《持续交付》这本书即围绕上述原则展开，我们就从配置管理开始。</p>
+<h2 id="配置管理（一）"><a href="#配置管理（一）" class="headerlink" title="配置管理（一）"></a>配置管理（一）</h2><p>下面我们来学习配置管理（Configuration Management）。配置管理可以用来解决以下问题：</p>
+<ol>
+<li>如何重现一个软件运行环境，包括环境中各种配置？</li>
+<li>在配置文件进行了小的改动，如何简单地将这个改动部署到需要的环境上？</li>
+<li>如何追踪某个配置在何时、由谁修改过？</li>
+<li>配置文件如何能够对团队成员共享以加速开发？</li>
+</ol>
+<p>我想大家在软件开发的实践中，或多或少都接触过上述问题。其实看到这些问题，我们很自然想到的解决方案就是：使用版本控制系统。</p>
+<p>《持续交付》这本书推荐将一<strong>切配置都使用版本控制系统来管理</strong>，即把配置像代码一样管理。好处就是，你可以始终对配置的改动进行追踪，找到需要的版本进行升级或回退，找到对应的修改者，以及拿到其他工程师最新的改动。</p>
+<p>除了上述好处，我们在使用版本控制工具管理配置文件时还需要注意：<br><strong>1、及时check-in代码</strong>：及时提交代码能保证自动化的持续交付过程始终在用最新的配置进行。如果长时间不提交，新的配置得不到验证，那么时间久了就可能引发较大的问题，阻断交付的流程。<br><strong>2、使用有意义的提交信息</strong>：这一点很直观，有意义的信息可以帮助自己和他人理解每一次改动，从而定位问题和找到需要的版本。</p>
+<p>配置文件可能存在于持续交付的各个阶段，比如在构建（build）、部署和运行时，都可能使用到配置。我们常见的是在部署和软件运行时动态使用配置文件，对于build阶段，配置可能会提供一些工具上的支持。</p>
+<p>从功能上看，配置文件可用于管理依赖、管理软件应用和管理环境。我们先看管理依赖。如果你做过Web前端开发，对NPM的<code>package.json</code>文件应该很熟悉。如果你做过.NET应用的开发，对<code>package.config</code>文件应该很熟悉。这些都是管理内部和外部依赖包的配置文件，并且通常需要跟源代码一起管理起来。应用程序在构建时，会读取这个配置，从内部或外部的服务器上下载构建需要的依赖包。对于依赖管理有两点要注意：<br><strong>1、依赖包的版本不能随意更改</strong>。因为依赖可能来自第三方的开发者，新版本的特性可能会导致你的应用程序出错。<br><strong>2、依赖包的服务器可以在企业内部自己搭建</strong>，这样可以有好的响应速度，也可以解决上述依赖更新导致的问题。</p>
+<p>接下来我们来看配置管理的另外两个功能。</p>
+<h2 id="配置管理（二）"><a href="#配置管理（二）" class="headerlink" title="配置管理（二）"></a>配置管理（二）</h2><p>下面我们继续看应用程序和运行环境的配置管理。</p>
+<p>应用程序中的配置通常是跟程序的逻辑相关的，为了实现上的灵活性，我们需要把一些数据写到配置文件中。这样我们通过更改配置文件，就可以实现程序逻辑的控制。我们常见的配置文件有Java程序的properties文件，JavaScript程序的JSON文件，Ruby程序的YAML文件，以及通用的XML文件等等。</p>
+<p>不过这里有一个权衡的问题。如果过度重视灵活性，即可配置的程度太高，那么程序就可能丧失一些功能性；反之，如果可配置的逻辑很少，那么很多代码都是写死的，就不容易动态修改程序行为。</p>
+<p>另一个问题是<strong>对配置文件的测试</strong>。我们容易忽略对配置文件的测试，甚至是最基本的语法检查都不注意，因为很多代码编辑器都不会检查配置文件的语法。在开发时候，配置文件可以正常被读写，但是部署到线上，由于环境和应用程序逻辑的变化，配置文件可能出问题。解决的方案就是积极地进行部署测试，即<strong>冒烟测试</strong>（smoke test）。冒烟测试的目的就是看看部署后的环境是否能正常工作，考察配置文件的功能是其中一个关注点。</p>
+<p>还有一个问题是配置文件的访问。好的实践方式是在应用程序中采用统一的配置存储和访问方式。比如，配置可以来自文件、API以及数据库，那么在各个模块中就尽量采用同一种方式，这样配置除了问题，排查起来就容易定位。另外，我们通常会在程序中定义专门访问配置的模块（类、接口），并开放给其他模块使用，将配置的读写逻辑抽象和封装起来，这样也有利于配置的管理和代码重构。</p>
+<p>在建模一个配置对象时，通常考虑三个因素：</p>
+<ol>
+<li>配置是给哪个应用和模块用的。</li>
+<li>应用和模块的版本。</li>
+<li>配置适用的环境。不同的模块的配置通常不同，而随着版本更新，配置也应该更新，因为有些配置可能已经失效了，或者添加了新的配置。对于不同的环境，如test，staging和production，通常采用不同的配置。</li>
+</ol>
+<p>最后我们来看环境的配置管理。我们希望能够随时自动生成一个满足要求的运行环境，这个环境包含的配置可能有：</p>
+<ol>
+<li>操作系统的类型以及设置（如Windows Server 2012）。</li>
+<li>预装的软件和服务（如IIS服务器）。</li>
+<li>网络拓扑（如外网访问）。</li>
+<li>外部的服务。</li>
+</ol>
+<p>有了这些配置，环境的部署和重建就是可重复的，并且可以在预期时间内完成。我的经验是，很多项目组并没有把环境部署也写成配置，每次部署都需要很多人工操作，这对于持续交付来说是不可接受的。另外，在环境部署时需要建立<strong>基线（baseline）</strong> 的概念，即把上一次成功部署的环境配置作为基线，每次有新的配置改动，就更新基线配置。这样下次重新部署时，就可以以基线为准，省去了很多重复工作。其实，这背后的思想就是把环境也当作代码来维护。</p>
+<p>以上就是关于配置管理的学习总结，欢迎讨论。接下来我们关注持续交付流程中的第一个重头戏：<strong>持续集成</strong>（continuous integration）。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/持续交付/" rel="tag"># 持续交付</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/05/angular-change-detection/" rel="next" title="Angular 变更检测探究">
+                  <i class="fa fa-chevron-left"></i> Angular 变更检测探究
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/12/31/continuous-delivery-part-2/" rel="prev" title="《持续交付》学习笔记（二）">
+                  《持续交付》学习笔记（二） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="comments"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概念：持续交付"><span class="nav-number">2.</span> <span class="nav-text">概念：持续交付</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要采用持续交付？"><span class="nav-number">3.</span> <span class="nav-text">为什么要采用持续交付？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置管理（一）"><span class="nav-number">4.</span> <span class="nav-text">配置管理（一）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置管理（二）"><span class="nav-number">5.</span> <span class="nav-text">配置管理（二）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="天择" src="/images/eggy.jpg">
+  <p class="site-author-name" itemprop="name">天择</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">天择</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'iYxYzsvoW5MSTGkvoTsS7sK1-gzGzoHsz',
+    appKey: 'OUdH5uIllMJSGG7i68OXfGXm',
+    placeholder: "欢迎交流...",
+    avatar: 'retro',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname,
+    recordIP: false,
+    serverURLs: ''
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>
