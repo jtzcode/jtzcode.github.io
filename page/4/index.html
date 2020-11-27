@@ -182,6 +182,107 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/02/typescript-types/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/eggy.jpg">
+      <meta itemprop="name" content="天择">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="两件事，读书，编程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/02/typescript-types/" class="post-title-link" itemprop="url">日拱一卒系列（二）—— 理解 TypeScript 类型</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-02 14:06:27" itemprop="dateCreated datePublished" datetime="2020-03-02T14:06:27+08:00">2020-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/03/02/typescript-types/" class="post-meta-item leancloud_visitors" data-flag-title="日拱一卒系列（二）—— 理解 TypeScript 类型" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/2020/03/02/typescript-types/abstract.jpg" alt="head"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>这篇文章谈谈有关 TypeScript 类型的一些概念和原理。学习资料来源于网络，欢迎讨论。感兴趣的朋友可以阅读参考资料中的原始文章。</p>
+<h2 id="如何理解-TypeScript-类型"><a href="#如何理解-TypeScript-类型" class="headerlink" title="如何理解 TypeScript 类型"></a>如何理解 TypeScript 类型</h2><p>首先，我们可以将TypeScript的类型理解为<strong>一组值（Values）的集合</strong>。如果变量a属于A类型，那么所有可以赋值给变量a的元素就组成了A类型的集合。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a: A;  <span class="comment">/* a is of type A */</span></span><br></pre></td></tr></table></figure>
+
+<p>如果A类型的变量可以赋值给B类型的变量，那么A类型所有可能的实例值也是B类型可能值的一部分。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a: A; <span class="comment">/* A type can be assigned to B type*/</span></span><br><span class="line"><span class="keyword">let</span> b: B = a;</span><br></pre></td></tr></table></figure>
+
+<p>如果是由类型A，B和C的联合（Union）定义的类型ABC，它的可能值的集合就是A，B和C三种类型所有可能值得集合。例如：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ABC = A | B | C;  <span class="comment">/* ABC is union of type A, B, C */</span></span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/02/typescript-types/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/14/cognitive-rules/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1060,102 +1161,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/03/continuous-delivery-part-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/eggy.jpg">
-      <meta itemprop="name" content="天择">
-      <meta itemprop="description" content>
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="两件事，读书，编程">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/03/continuous-delivery-part-3/" class="post-title-link" itemprop="url">《持续交付》学习笔记（三）</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-01-03 11:15:36" itemprop="dateCreated datePublished" datetime="2020-01-03T11:15:36+08:00">2020-01-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-10 10:32:42" itemprop="dateModified" datetime="2020-11-10T10:32:42+08:00">2020-11-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span id="/2020/01/03/continuous-delivery-part-3/" class="post-meta-item leancloud_visitors" data-flag-title="《持续交付》学习笔记（三）" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>本文是《持续交付》一书学习总结的第三篇。主要内容涉及部署流线和部署脚本的设计实践。</p>
-<p><img src="/2020/01/03/continuous-delivery-part-3/cd.jpg" alt="持续交付"></p>
-<h2 id="部署流水线（一）"><a href="#部署流水线（一）" class="headerlink" title="部署流水线（一）"></a>部署流水线（一）</h2><p>要实现持续交付，一般会定义一条部署流水线（deployment pipeline）。我们之前讨论过的持续集成过程，就是这个流水线的一部分。总的来说，部署流水线就是一套将代码从版本控制工具最终交付到用户手中的自动化流程。我们在前面看到了自动化的持续集成，以及验收测试。除此之外，部署流水线还包含在流程各个阶段（开发、测试、发布等）对软件的部署以及发布流程的管理。可以说，《持续交付》整本书都在围绕部署流水线进行讨论。</p>
-<p>部署流水线的第一个好处我们多次提到过，就是基于自动化的快速反馈，如下图。在部署流水线的每一个阶段都能形成及时的反馈，让团队合作解决问题。经过多次反馈，到发布阶段时的软件质量是很高的。</p>
-<p><img src="/2020/01/03/continuous-delivery-part-3/feedback.jpg" alt="反馈"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/01/03/continuous-delivery-part-3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1205,7 +1210,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">48</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1218,7 +1223,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
